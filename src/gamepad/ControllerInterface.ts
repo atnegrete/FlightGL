@@ -16,4 +16,6 @@ export interface ControllerInterface {
   isLeftViewPressed(): boolean;
 
   isRightViewPressed(): boolean;
+
+  update(): void;
 }
