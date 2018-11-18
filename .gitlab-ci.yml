@@ -14,7 +14,7 @@ stages:
 test_eslint:
   stage: test_eslint
   script:
-    - npm run lint-ci
+    - npm run eslint-ci
 
 test_prettier:
   stage: test_prettier
