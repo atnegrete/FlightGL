@@ -1,0 +1,22 @@
+image: node:10.13-alpine
+
+cache:
+  paths:
+    - node_modules/
+
+before_script:
+  - npm i
+
+stages:
+  - test_eslint
+  - test_prettier
+
+test_eslint:
+  stage: test_eslint
+  script:
+    - npm run lint-ci
+
+test_prettier:
+  stage: test_prettier
+  script:
+    - npm run prettier-ci
