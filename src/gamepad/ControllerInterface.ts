@@ -1,21 +1,19 @@
-
 export interface ControllerInterface {
+  getYaw(): number;
 
-    getYaw(): number;
+  getPitch(): number;
 
-    getPitch(): number;
+  getRoll(): number;
 
-    getRoll(): number;
+  isZoomIn(): boolean;
 
-    isZoomIn(): boolean;
+  isZoomOut(): boolean;
 
-    isZoomOut(): boolean;
-    
-    isTopViewPressed(): boolean;
+  isTopViewPressed(): boolean;
 
-    isBottomViewPressed(): boolean;
+  isBottomViewPressed(): boolean;
 
-    isLeftViewPressed(): boolean;
+  isLeftViewPressed(): boolean;
 
-    isRightViewPressed(): boolean;
+  isRightViewPressed(): boolean;
 }

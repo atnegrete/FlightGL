@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 
 const STATE = {
-  NONE: - 1,
+  NONE: -1,
   ROTATE: 0,
   DOLLY: 1,
   PAN: 2,
   TOUCH_ROTATE: 3,
   TOUCH_DOLLY: 4,
-  TOUCH_PAN: 5
+  TOUCH_PAN: 5,
 };
 
 const CHANGE_EVENT = { type: 'change' };
@@ -16,19 +16,19 @@ const END_EVENT = { type: 'end' };
 const EPS = 0.000001;
 
 /**
-* @author qiao / https://github.com/qiao
-* @author mrdoob / http://mrdoob.com
-* @author alteredq / http://alteredqualia.com/
-* @author WestLangley / http://github.com/WestLangley
-* @author erich666 / http://erichaines.com
-* @author nicolaspanel / http://github.com/nicolaspanel
-*
-* This set of controls performs orbiting, dollying (zooming), and panning.
-* Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
-*    Orbit - left mouse / touch: one finger move
-*    Zoom - middle mouse, or mousewheel / touch: two finger spread or squish
-*    Pan - right mouse, or arrow keys / touch: three finger swipe
-*/
+ * @author qiao / https://github.com/qiao
+ * @author mrdoob / http://mrdoob.com
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author erich666 / http://erichaines.com
+ * @author nicolaspanel / http://github.com/nicolaspanel
+ *
+ * This set of controls performs orbiting, dollying (zooming), and panning.
+ * Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
+ *    Orbit - left mouse / touch: one finger move
+ *    Zoom - middle mouse, or mousewheel / touch: two finger spread or squish
+ *    Pan - right mouse, or arrow keys / touch: three finger swipe
+ */
 export class OrbitControls extends THREE.EventDispatcher {
   object: THREE.Camera;
   domElement: HTMLElement | HTMLDocument;
@@ -55,8 +55,8 @@ export class OrbitControls extends THREE.EventDispatcher {
   minAzimuthAngle: number;
   maxAzimuthAngle: number;
   enableKeys: boolean;
-  keys: { LEFT: number; UP: number; RIGHT: number; BOTTOM: number; };
-  mouseButtons: { ORBIT: THREE.MOUSE; ZOOM: THREE.MOUSE; PAN: THREE.MOUSE; };
+  keys: { LEFT: number; UP: number; RIGHT: number; BOTTOM: number };
+  mouseButtons: { ORBIT: THREE.MOUSE; ZOOM: THREE.MOUSE; PAN: THREE.MOUSE };
   enableDamping: boolean;
   dampingFactor: number;
 
@@ -72,7 +72,7 @@ export class OrbitControls extends THREE.EventDispatcher {
 
   private rotateStart: THREE.Vector2;
   private rotateEnd: THREE.Vector2;
-  private rotateDelta: THREE.Vector2
+  private rotateDelta: THREE.Vector2;
 
   private panStart: THREE.Vector2;
   private panEnd: THREE.Vector2;
@@ -102,12 +102,16 @@ export class OrbitControls extends THREE.EventDispatcher {
   private onTouchMove: EventListener;
   private onKeyDown: EventListener;
 
-  constructor (object: THREE.Camera, domElement?: HTMLElement, domWindow?: Window) {
+  constructor(
+    object: THREE.Camera,
+    domElement?: HTMLElement,
+    domWindow?: Window
+  ) {
     super();
     this.object = object;
 
-    this.domElement = ( domElement !== undefined ) ? domElement : document;
-    this.window = ( domWindow !== undefined ) ? domWindow : window;
+    this.domElement = domElement !== undefined ? domElement : document;
+    this.window = domWindow !== undefined ? domWindow : window;
 
     // Set to false to disable this control
     this.enabled = true;
@@ -130,7 +134,7 @@ export class OrbitControls extends THREE.EventDispatcher {
 
     // How far you can orbit horizontally, upper and lower limits.
     // If set, must be a sub-interval of the interval [ - Math.PI, Math.PI ].
-    this.minAzimuthAngle = - Infinity; // radians
+    this.minAzimuthAngle = -Infinity; // radians
     this.maxAzimuthAngle = Infinity; // radians
 
     // Set to true to enable damping (inertia)
@@ -149,7 +153,7 @@ export class OrbitControls extends THREE.EventDispatcher {
 
     // Set to false to disable panning
     this.enablePan = true;
-    this.keyPanSpeed = 7.0;	// pixels moved per arrow key push
+    this.keyPanSpeed = 7.0; // pixels moved per arrow key push
 
     // Set to true to automatically rotate around the target
     // If auto-rotate is enabled, you must call controls.update() in your animation loop
@@ -163,7 +167,11 @@ export class OrbitControls extends THREE.EventDispatcher {
     this.keys = { LEFT: 37, UP: 38, RIGHT: 39, BOTTOM: 40 };
 
     // Mouse buttons
-    this.mouseButtons = { ORBIT: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.RIGHT };
+    this.mouseButtons = {
+      ORBIT: THREE.MOUSE.LEFT,
+      ZOOM: THREE.MOUSE.MIDDLE,
+      PAN: THREE.MOUSE.RIGHT,
+    };
 
     // for reset
     this.target0 = this.target.clone();
@@ -173,7 +181,10 @@ export class OrbitControls extends THREE.EventDispatcher {
     // for update speedup
     this.updateOffset = new THREE.Vector3();
     // so camera.up is the orbit axis
-    this.updateQuat = new THREE.Quaternion().setFromUnitVectors( object.up, new THREE.Vector3( 0, 1, 0 ) );
+    this.updateQuat = new THREE.Quaternion().setFromUnitVectors(
+      object.up,
+      new THREE.Vector3(0, 1, 0)
+    );
     this.updateQuatInverse = this.updateQuat.clone().inverse();
     this.updateLastPosition = new THREE.Vector3();
     this.updateLastQuaternion = new THREE.Quaternion();
@@ -204,217 +215,255 @@ export class OrbitControls extends THREE.EventDispatcher {
     this.panUpV = new THREE.Vector3();
     this.panInternalOffset = new THREE.Vector3();
 
-    this.onTouchEnd = ( event: Event ) => {
-
-      if ( this.enabled === false ) return;
-      this.dispatchEvent( END_EVENT );
+    this.onTouchEnd = (event: Event) => {
+      if (this.enabled === false) return;
+      this.dispatchEvent(END_EVENT);
       this.state = STATE.NONE;
-    }
+    };
 
-    this.onContextMenu = (event) => {
+    this.onContextMenu = event => {
       event.preventDefault();
     };
 
-    this.domElement.addEventListener( 'contextmenu', this.onContextMenu, false );
+    this.domElement.addEventListener('contextmenu', this.onContextMenu, false);
 
-    this.domElement.addEventListener( 'mousedown', this.onMouseDown, false );
-    this.domElement.addEventListener( 'wheel', this.onMouseWheel, false );
+    this.domElement.addEventListener('mousedown', this.onMouseDown, false);
+    this.domElement.addEventListener('wheel', this.onMouseWheel, false);
 
-    this.domElement.addEventListener( 'touchstart', this.onTouchStart, false );
-    this.domElement.addEventListener( 'touchend', this.onTouchEnd, false );
-    this.domElement.addEventListener( 'touchmove', this.onTouchMove, false );
+    this.domElement.addEventListener('touchstart', this.onTouchStart, false);
+    this.domElement.addEventListener('touchend', this.onTouchEnd, false);
+    this.domElement.addEventListener('touchmove', this.onTouchMove, false);
 
-    this.window.addEventListener( 'keydown', this.onKeyDown, false );
+    this.window.addEventListener('keydown', this.onKeyDown, false);
 
     // force an update at start
     this.update();
   }
 
-  update () {
+  update() {
     const position = this.object.position;
-    this.updateOffset.copy( position ).sub( this.target );
+    this.updateOffset.copy(position).sub(this.target);
 
     // rotate offset to "y-axis-is-up" space
-    this.updateOffset.applyQuaternion( this.updateQuat );
+    this.updateOffset.applyQuaternion(this.updateQuat);
 
     // angle from z-axis around y-axis
-    this.spherical.setFromVector3( this.updateOffset );
+    this.spherical.setFromVector3(this.updateOffset);
 
-    if ( this.autoRotate && this.state === STATE.NONE ) {
-      this.rotateLeft( this.getAutoRotationAngle() );
+    if (this.autoRotate && this.state === STATE.NONE) {
+      this.rotateLeft(this.getAutoRotationAngle());
     }
 
     (this.spherical as any).theta += (this.sphericalDelta as any).theta;
     (this.spherical as any).phi += (this.sphericalDelta as any).phi;
 
     // restrict theta to be between desired limits
-    (this.spherical as (any) as any).theta = Math.max( this.minAzimuthAngle, Math.min( this.maxAzimuthAngle, (this.spherical as any).theta ) );
+    ((this.spherical as any) as any).theta = Math.max(
+      this.minAzimuthAngle,
+      Math.min(this.maxAzimuthAngle, (this.spherical as any).theta)
+    );
 
     // restrict phi to be between desired limits
-    (this.spherical as any).phi = Math.max( this.minPolarAngle, Math.min( this.maxPolarAngle, (this.spherical as any).phi ) );
+    (this.spherical as any).phi = Math.max(
+      this.minPolarAngle,
+      Math.min(this.maxPolarAngle, (this.spherical as any).phi)
+    );
 
     this.spherical.makeSafe();
 
     (this.spherical as any).radius *= this.scale;
 
     // restrict radius to be between desired limits
-    (this.spherical as any).radius = Math.max( this.minDistance, Math.min( this.maxDistance, (this.spherical as any).radius ) );
+    (this.spherical as any).radius = Math.max(
+      this.minDistance,
+      Math.min(this.maxDistance, (this.spherical as any).radius)
+    );
 
     // move target to panned location
-    this.target.add( this.panOffset );
+    this.target.add(this.panOffset);
 
-    this.updateOffset.setFromSpherical( this.spherical );
+    this.updateOffset.setFromSpherical(this.spherical);
 
     // rotate offset back to "camera-up-vector-is-up" space
-    this.updateOffset.applyQuaternion( this.updateQuatInverse );
+    this.updateOffset.applyQuaternion(this.updateQuatInverse);
 
-    position.copy( this.target ).add( this.updateOffset );
+    position.copy(this.target).add(this.updateOffset);
 
-    this.object.lookAt( this.target );
+    this.object.lookAt(this.target);
 
-    if ( this.enableDamping === true ) {
-
-      (this.sphericalDelta as any).theta *= ( 1 - this.dampingFactor );
-      (this.sphericalDelta as any).phi *= ( 1 - this.dampingFactor );
-
+    if (this.enableDamping === true) {
+      (this.sphericalDelta as any).theta *= 1 - this.dampingFactor;
+      (this.sphericalDelta as any).phi *= 1 - this.dampingFactor;
     } else {
-
-      this.sphericalDelta.set( 0, 0, 0 );
-
+      this.sphericalDelta.set(0, 0, 0);
     }
 
     this.scale = 1;
-    this.panOffset.set( 0, 0, 0 );
+    this.panOffset.set(0, 0, 0);
 
     // update condition is:
     // min(camera displacement, camera rotation in radians)^2 > EPS
     // using small-angle approximation cos(x/2) = 1 - x^2 / 8
 
-    if ( this.zoomChanged ||
-      this.updateLastPosition.distanceToSquared( this.object.position ) > EPS ||
-      8 * ( 1 - this.updateLastQuaternion.dot( this.object.quaternion ) ) > EPS ) {
-
-      this.dispatchEvent( CHANGE_EVENT );
-      this.updateLastPosition.copy( this.object.position );
-      this.updateLastQuaternion.copy( this.object.quaternion );
+    if (
+      this.zoomChanged ||
+      this.updateLastPosition.distanceToSquared(this.object.position) > EPS ||
+      8 * (1 - this.updateLastQuaternion.dot(this.object.quaternion)) > EPS
+    ) {
+      this.dispatchEvent(CHANGE_EVENT);
+      this.updateLastPosition.copy(this.object.position);
+      this.updateLastQuaternion.copy(this.object.quaternion);
       this.zoomChanged = false;
       return true;
     }
     return false;
   }
 
-  panLeft( distance: number, objectMatrix: THREE.Matrix4 ) {
-    this.panLeftV.setFromMatrixColumn( objectMatrix, 0 ); // get X column of objectMatrix
-    this.panLeftV.multiplyScalar( - distance );
-    this.panOffset.add( this.panLeftV );
+  panLeft(distance: number, objectMatrix: THREE.Matrix4) {
+    this.panLeftV.setFromMatrixColumn(objectMatrix, 0); // get X column of objectMatrix
+    this.panLeftV.multiplyScalar(-distance);
+    this.panOffset.add(this.panLeftV);
   }
 
-  panUp( distance: number, objectMatrix: THREE.Matrix4 ) {
-    this.panUpV.setFromMatrixColumn( objectMatrix, 1 ); // get Y column of objectMatrix
-    this.panUpV.multiplyScalar( distance );
-    this.panOffset.add( this.panUpV );
+  panUp(distance: number, objectMatrix: THREE.Matrix4) {
+    this.panUpV.setFromMatrixColumn(objectMatrix, 1); // get Y column of objectMatrix
+    this.panUpV.multiplyScalar(distance);
+    this.panOffset.add(this.panUpV);
   }
 
   // deltaX and deltaY are in pixels; right and down are positive
-  pan( deltaX: number, deltaY: number ) {
-    const element = this.domElement === document ? this.domElement.body : this.domElement;
+  pan(deltaX: number, deltaY: number) {
+    const element =
+      this.domElement === document ? this.domElement.body : this.domElement;
 
     if (this._checkPerspectiveCamera(this.object)) {
       // perspective
       const position = this.object.position;
-      this.panInternalOffset.copy( position ).sub( this.target );
+      this.panInternalOffset.copy(position).sub(this.target);
       var targetDistance = this.panInternalOffset.length();
 
       // half of the fov is center to top of screen
-      targetDistance *= Math.tan( ( this.object.fov / 2 ) * Math.PI / 180.0 );
+      targetDistance *= Math.tan(((this.object.fov / 2) * Math.PI) / 180.0);
 
       // we actually don't use screenWidth, since perspective camera is fixed to screen height
-      this.panLeft( 2 * deltaX * targetDistance / (element as any).clientHeight, this.object.matrix );
-      this.panUp( 2 * deltaY * targetDistance / (element as any).clientHeight, this.object.matrix );
+      this.panLeft(
+        (2 * deltaX * targetDistance) / (element as any).clientHeight,
+        this.object.matrix
+      );
+      this.panUp(
+        (2 * deltaY * targetDistance) / (element as any).clientHeight,
+        this.object.matrix
+      );
     } else if (this._checkOrthographicCamera(this.object)) {
       // orthographic
-      this.panLeft( deltaX * ( this.object.right - this.object.left ) / this.object.zoom / (element as any).clientWidth, this.object.matrix );
-      this.panUp( deltaY * ( this.object.top - this.object.bottom ) / this.object.zoom / (element as any).clientHeight, this.object.matrix );
+      this.panLeft(
+        (deltaX * (this.object.right - this.object.left)) /
+          this.object.zoom /
+          (element as any).clientWidth,
+        this.object.matrix
+      );
+      this.panUp(
+        (deltaY * (this.object.top - this.object.bottom)) /
+          this.object.zoom /
+          (element as any).clientHeight,
+        this.object.matrix
+      );
     } else {
       // camera neither orthographic nor perspective
-      console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - pan disabled.' );
+      console.warn(
+        'WARNING: OrbitControls.js encountered an unknown camera type - pan disabled.'
+      );
       this.enablePan = false;
     }
   }
 
-  dollyIn( dollyScale: number ) {
+  dollyIn(dollyScale: number) {
     if (this._checkPerspectiveCamera(this.object)) {
       this.scale /= dollyScale;
     } else if (this._checkOrthographicCamera(this.object)) {
-      this.object.zoom = Math.max( this.minZoom, Math.min( this.maxZoom, this.object.zoom * dollyScale ) );
+      this.object.zoom = Math.max(
+        this.minZoom,
+        Math.min(this.maxZoom, this.object.zoom * dollyScale)
+      );
       this.object.updateProjectionMatrix();
       this.zoomChanged = true;
     } else {
-      console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
+      console.warn(
+        'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.'
+      );
       this.enableZoom = false;
     }
   }
 
-  dollyOut( dollyScale: number ) {
+  dollyOut(dollyScale: number) {
     if (this._checkPerspectiveCamera(this.object)) {
       this.scale *= dollyScale;
     } else if (this._checkOrthographicCamera(this.object)) {
-      this.object.zoom = Math.max( this.minZoom, Math.min( this.maxZoom, this.object.zoom / dollyScale ) );
+      this.object.zoom = Math.max(
+        this.minZoom,
+        Math.min(this.maxZoom, this.object.zoom / dollyScale)
+      );
       this.object.updateProjectionMatrix();
       this.zoomChanged = true;
     } else {
-      console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
+      console.warn(
+        'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.'
+      );
       this.enableZoom = false;
     }
   }
 
   getAutoRotationAngle() {
-    return 2 * Math.PI / 60 / 60 * this.autoRotateSpeed;
+    return ((2 * Math.PI) / 60 / 60) * this.autoRotateSpeed;
   }
 
   getZoomScale() {
-    return Math.pow( 0.95, this.zoomSpeed );
+    return Math.pow(0.95, this.zoomSpeed);
   }
 
-  rotateLeft( angle: number ) {
+  rotateLeft(angle: number) {
     (this.sphericalDelta as any).theta -= angle;
   }
 
-  rotateUp( angle: number ) {
+  rotateUp(angle: number) {
     (this.sphericalDelta as any).phi -= angle;
   }
 
-  getPolarAngle (): number {
+  getPolarAngle(): number {
     return (this.spherical as any).phi;
   }
 
-  getAzimuthalAngle (): number {
+  getAzimuthalAngle(): number {
     return (this.spherical as any).theta;
   }
 
-  dispose (): void {
-    this.domElement.removeEventListener( 'contextmenu', this.onContextMenu, false );
-    this.domElement.removeEventListener( 'mousedown', this.onMouseDown, false );
-    this.domElement.removeEventListener( 'wheel', this.onMouseWheel, false );
+  dispose(): void {
+    this.domElement.removeEventListener(
+      'contextmenu',
+      this.onContextMenu,
+      false
+    );
+    this.domElement.removeEventListener('mousedown', this.onMouseDown, false);
+    this.domElement.removeEventListener('wheel', this.onMouseWheel, false);
 
-    this.domElement.removeEventListener( 'touchstart', this.onTouchStart, false );
-    this.domElement.removeEventListener( 'touchend', this.onTouchEnd, false );
-    this.domElement.removeEventListener( 'touchmove', this.onTouchMove, false );
+    this.domElement.removeEventListener('touchstart', this.onTouchStart, false);
+    this.domElement.removeEventListener('touchend', this.onTouchEnd, false);
+    this.domElement.removeEventListener('touchmove', this.onTouchMove, false);
 
-    document.removeEventListener( 'mousemove', this.onMouseMove, false );
-    document.removeEventListener( 'mouseup', this.onMouseUp, false );
+    document.removeEventListener('mousemove', this.onMouseMove, false);
+    document.removeEventListener('mouseup', this.onMouseUp, false);
 
-    this.window.removeEventListener( 'keydown', this.onKeyDown, false );
+    this.window.removeEventListener('keydown', this.onKeyDown, false);
     //this.dispatchEvent( { type: 'dispose' } ); // should this be added here?
   }
 
-  reset (): void {
-    this.target.copy( this.target0 );
-    this.object.position.copy( this.position0 );
+  reset(): void {
+    this.target.copy(this.target0);
+    this.object.position.copy(this.position0);
     (this.object as any).zoom = this.zoom0;
 
     (this.object as any).updateProjectionMatrix();
-    this.dispatchEvent( CHANGE_EVENT );
+    this.dispatchEvent(CHANGE_EVENT);
 
     this.update();
 
@@ -425,7 +474,10 @@ export class OrbitControls extends THREE.EventDispatcher {
     this.target0.copy(this.target);
     this.position0.copy(this.object.position);
     // Check whether the camera has zoom property
-    if (this._checkOrthographicCamera(this.object) || this._checkPerspectiveCamera(this.object)){
+    if (
+      this._checkOrthographicCamera(this.object) ||
+      this._checkPerspectiveCamera(this.object)
+    ) {
       this.zoom0 = this.object.zoom;
     }
   }
@@ -436,29 +488,37 @@ export class OrbitControls extends THREE.EventDispatcher {
     return this.target;
   }
   get noZoom(): boolean {
-    console.warn( 'THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.' );
-    return ! this.enableZoom;
+    console.warn(
+      'THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.'
+    );
+    return !this.enableZoom;
   }
 
-  set noZoom( value: boolean ) {
-    console.warn( 'THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.' );
-    this.enableZoom = ! value;
+  set noZoom(value: boolean) {
+    console.warn(
+      'THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.'
+    );
+    this.enableZoom = !value;
   }
 
   /**
-   * TS typeguard. Checks whether the provided camera is PerspectiveCamera. 
+   * TS typeguard. Checks whether the provided camera is PerspectiveCamera.
    * If the check passes (returns true) the passed camera will have the type THREE.PerspectiveCamera in the if branch where the check was performed.
    * @param camera Object to be checked.
    */
-  private _checkPerspectiveCamera(camera: THREE.Camera): camera is THREE.PerspectiveCamera{
+  private _checkPerspectiveCamera(
+    camera: THREE.Camera
+  ): camera is THREE.PerspectiveCamera {
     return (camera as THREE.PerspectiveCamera).isPerspectiveCamera;
   }
   /**
-   * TS typeguard. Checks whether the provided camera is OrthographicCamera. 
+   * TS typeguard. Checks whether the provided camera is OrthographicCamera.
    * If the check passes (returns true) the passed camera will have the type THREE.OrthographicCamera in the if branch where the check was performed.
    * @param camera Object to be checked.
    */
-  private _checkOrthographicCamera(camera: THREE.Camera): camera is THREE.OrthographicCamera{
+  private _checkOrthographicCamera(
+    camera: THREE.Camera
+  ): camera is THREE.OrthographicCamera {
     return (camera as THREE.OrthographicCamera).isOrthographicCamera;
   }
 }

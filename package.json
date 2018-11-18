@@ -5,7 +5,9 @@
   "main": "app.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server",
+    "eslint-ci": "./node_modules/.bin/eslint src/**/*.ts",
+    "prettier-ci": "prettier-check src/**/*.ts"
   },
   "author": "",
   "license": "ISC",
@@ -18,7 +20,13 @@
     "typescript": "^2.6.2"
   },
   "devDependencies": {
+    "eslint": "^5.9.0",
+    "eslint-plugin-prettier": "^3.0.0",
+    "eslint-plugin-typescript": "^0.13.0",
+    "prettier": "^1.15.2",
+    "prettier-check": "^2.0.0",
+    "typescript-eslint-parser": "^21.0.1",
     "webpack": "^3.6.0",
-    "webpack-dev-server": "^2.8.2"
+    "webpack-dev-server": "^2.8.1"
   }
 }
