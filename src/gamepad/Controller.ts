@@ -34,9 +34,9 @@ export abstract class Controller implements ControllerInterface {
   }
 }
 
-import { Playstation3 } from './Playstation3';
+import { Playstation3, Keyboard } from './Controllers';
 
-export function createController(): Controller {
+export function createController(): ControllerInterface {
   let gamepads: Gamepad[] = navigator.getGamepads();
 
   console.log(gamepads);
@@ -49,5 +49,5 @@ export function createController(): Controller {
     }
   }
 
-  return null;
+  return new Keyboard();
 }
