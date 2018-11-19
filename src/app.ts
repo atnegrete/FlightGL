@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import { Box } from './models/Box';
-import { Controller, createController } from './gamepad/Controller';
+import { createController } from './gamepad/Controller';
 import { OrbitControls } from './controller/OrbitControls';
 import { ControllerInterface } from './gamepad/ControllerInterface';
 
@@ -14,6 +14,8 @@ enum VIEW {
 }
 
 class App {
+  private readonly SPEED_FACTOR = 0.1;
+
   private readonly renderer = new THREE.WebGLRenderer({
     antialias: true,
     canvas: <HTMLCanvasElement>document.getElementById('mainCanvas'),
@@ -128,9 +130,9 @@ class App {
 
     this.controls.update();
 
-    this.box.rotateY(this.controller.getYaw());
-    this.box.rotateX(this.controller.getPitch());
-    this.box.rotateZ(this.controller.getRoll());
+    this.box.rotateY(this.controller.getYaw() * this.SPEED_FACTOR);
+    this.box.rotateX(this.controller.getPitch() * this.SPEED_FACTOR);
+    this.box.rotateZ(this.controller.getRoll() * this.SPEED_FACTOR);
 
     requestAnimationFrame(() => {
       this.render();

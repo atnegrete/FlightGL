@@ -34,7 +34,7 @@ export abstract class Controller implements ControllerInterface {
   }
 }
 
-import { Playstation3, Keyboard } from './Controllers';
+import { Playstation3, Keyboard, SaitekX52 } from './Controllers';
 
 export function createController(): ControllerInterface {
   let gamepads: Gamepad[] = navigator.getGamepads();
@@ -45,6 +45,8 @@ export function createController(): ControllerInterface {
     if (gamepads[i]) {
       if (gamepads[i].id.startsWith('PLAYSTATION')) {
         return new Playstation3(i, navigator);
+      } else if (gamepads[i].id.startsWith('Saitek X52 Flight Control System')) {
+        return new SaitekX52(i, navigator);
       }
     }
   }
