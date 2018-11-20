@@ -14,7 +14,7 @@ enum VIEW {
 }
 
 class App {
-  private readonly SPEED_FACTOR = 0.1;
+  private readonly SPEED_FACTOR = 0.03;
 
   private readonly renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -22,15 +22,15 @@ class App {
   });
   private readonly scene = new THREE.Scene();
   private readonly camera = new THREE.PerspectiveCamera(
-    45,
+    60,
     innerWidth / innerHeight,
     0.1,
     10000
   );
-  private readonly controls = new OrbitControls(
-    this.camera,
-    this.renderer.domElement
-  );
+  // private readonly controls = new OrbitControls(
+  //   this.camera,
+  //   this.renderer.domElement
+  // );
   private readonly light = new THREE.DirectionalLight(0xffffff, 1);
 
   private box: Box;
@@ -54,20 +54,19 @@ class App {
     this.boxes = [];
     this.generateBoxes();
 
-    this.box = new Box();
     this.view = VIEW.NORMAL_VIEW;
-    this.scene.add(this.box);
 
     this.camera.position.set(200, 200, 200);
+    this.scene.add(this.camera);
+
+    this.box = new Box();
+    this.box.position.set(0, 0, -250);
+    this.camera.add(this.box);
+
     this.renderer.setSize(innerWidth, innerHeight);
     this.renderer.setClearColor(new THREE.Color('rgb(0,0,0)'));
     this.light.position.set(0, 1, 1).normalize();
     this.scene.add(this.light);
-
-    this.controls.dampingFactor = 1;
-    this.controls.minDistance = 100;
-    this.controls.maxDistance = 2000;
-    this.controls.maxPolarAngle = Math.PI / 2;
 
     this.render();
   }
@@ -77,13 +76,18 @@ class App {
       let box = new Box();
       box.geometry.scale(1, 1, 1);
       box.position.set(
-        Math.random() * innerHeight,
-        Math.random() * innerHeight,
-        Math.random() * 200
+        this.getRandomNumber(),
+        this.getRandomNumber(),
+        this.getRandomNumber()
       );
       this.boxes.push(box);
       this.scene.add(this.boxes[i]);
     }
+  }
+
+  private getRandomNumber() {
+    let num = Math.random() * innerHeight * 0.75;
+    return Math.random() > 5 ? num : -num;
   }
 
   private adjustCanvasSize() {
@@ -94,76 +98,58 @@ class App {
 
   private adjustCameraLocation() {
     if (this.controller.isTopViewPressed()) {
-      if (this.view != VIEW.NORMAL_VIEW) return;
-      this.view = VIEW.TOP_VIEW;
-      this.controls.rotateUp(1);
-      console.log('TOP');
+      // if (this.view != VIEW.NORMAL_VIEW) return;
+      // this.view = VIEW.TOP_VIEW;
+      // this.controls.rotateUp(1);
+      // console.log('TOP');
     } else if (this.controller.isBottomViewPressed()) {
-      if (this.view != VIEW.NORMAL_VIEW) return;
-      this.view = VIEW.BOTTOM_VIEW;
-      this.controls.rotateUp(-1);
-      console.log('BOTTOM');
+      // if (this.view != VIEW.NORMAL_VIEW) return;
+      // this.view = VIEW.BOTTOM_VIEW;
+      // this.controls.rotateUp(-1);
+      // console.log('BOTTOM');
     } else if (this.controller.isLeftViewPressed()) {
       if (this.view != VIEW.NORMAL_VIEW) return;
       this.view = VIEW.LEFT_VIEW;
-      this.controls.rotateLeft(1);
-      console.log('LEFT');
+      this.camera.lookAt(
+        this.box.position.x - 50,
+        this.box.position.y,
+        this.box.position.z
+      );
+      this.box.position.x = 50;
     } else if (this.controller.isRightViewPressed()) {
       if (this.view != VIEW.NORMAL_VIEW) return;
       this.view = VIEW.RIGHT_VIEW;
-      this.controls.rotateLeft(-1);
-      console.log('RIGHT');
+      this.camera.lookAt(
+        this.box.position.x + 50,
+        this.box.position.y,
+        this.box.position.z
+      );
+      this.box.position.x = -50;
     } else if (this.view != VIEW.NORMAL_VIEW) {
       console.log('NORMAL');
       this.view = VIEW.NORMAL_VIEW;
-      this.camera.position.set(
-        this.currentPositionVector.x,
-        this.currentPositionVector.y,
-        this.currentPositionVector.z
-      );
-    }
-  }
-
-  private adjustCameraZoom() {
-    if (this.controller.isZoomIn()) {
-      console.log('ZOOM_IN');
-      this.controls.dollyIn(this.controls.getZoomScale());
-      this.currentPositionVector = this.camera.position;
-      console.log(this.camera.position);
-    } else if (this.controller.isZoomOut()) {
-      console.log('ZOOM_OUT');
-      this.controls.dollyOut(this.controls.getZoomScale());
-      this.currentPositionVector = this.camera.position;
-      console.log(this.camera.position);
+      this.box.position.x = 0;
+      this.camera.lookAt(this.box.position);
     }
   }
 
   private render() {
     this.controller.update();
 
-    this.box.position.set(
-      this.camera.position.x - 100,
-      this.camera.position.y - 100,
-      this.camera.position.z - 100
-    );
-
     this.renderer.render(this.scene, this.camera);
 
     this.adjustCanvasSize();
     this.adjustCameraLocation();
-    this.adjustCameraZoom();
 
     if (this.controller.isForwardPressed()) {
-      this.controls.pan(0, this.controls.getPanSpeed());
+      this.camera.translateZ(10);
     } else if (this.controller.isBackwardPressed()) {
-      this.controls.pan(0, -this.controls.getPanSpeed());
+      this.camera.translateZ(-10);
     }
 
-    this.controls.update();
-    
-    this.box.rotateY(this.controller.getYaw() * this.SPEED_FACTOR);
-    this.box.rotateX(this.controller.getPitch() * this.SPEED_FACTOR);
-    this.box.rotateZ(this.controller.getRoll() * this.SPEED_FACTOR);
+    this.camera.rotateY(this.controller.getYaw() * this.SPEED_FACTOR);
+    this.camera.rotateX(this.controller.getPitch() * this.SPEED_FACTOR);
+    this.camera.rotateZ(this.controller.getRoll() * this.SPEED_FACTOR);
 
     requestAnimationFrame(() => {
       this.render();
