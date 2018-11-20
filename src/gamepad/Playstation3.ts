@@ -33,7 +33,16 @@ export class Playstation3 extends Controller implements ControllerInterface {
   isLeftViewPressed(): boolean {
     return this.gamepad.buttons[14].pressed;
   }
+
   isRightViewPressed(): boolean {
     return this.gamepad.buttons[15].pressed;
+  }
+
+  isForwardPressed(): boolean {
+    return this.gamepad.buttons[6].pressed;
+  }
+
+  isBackwardPressed(): boolean {
+    return this.gamepad.buttons[7].pressed;
   }
 }

@@ -34,6 +34,7 @@ class App {
   private readonly light = new THREE.DirectionalLight(0xffffff, 1);
 
   private box: Box;
+  private boxes: any[];
   private view: VIEW;
   private controller: ControllerInterface;
   private currentPositionVector: THREE.Vector3 = <THREE.Vector3>{
@@ -50,6 +51,9 @@ class App {
       return;
     }
 
+    this.boxes = [];
+    this.generateBoxes();
+
     this.box = new Box();
     this.view = VIEW.NORMAL_VIEW;
     this.scene.add(this.box);
@@ -62,10 +66,24 @@ class App {
 
     this.controls.dampingFactor = 1;
     this.controls.minDistance = 100;
-    this.controls.maxDistance = 500;
+    this.controls.maxDistance = 2000;
     this.controls.maxPolarAngle = Math.PI / 2;
 
     this.render();
+  }
+
+  private generateBoxes() {
+    for (let i = 0; i < 10; ++i) {
+      let box = new Box();
+      box.geometry.scale(1, 1, 1);
+      box.position.set(
+        Math.random() * innerHeight,
+        Math.random() * innerHeight,
+        Math.random() * 200
+      );
+      this.boxes.push(box);
+      this.scene.add(this.boxes[i]);
+    }
   }
 
   private adjustCanvasSize() {
@@ -122,11 +140,24 @@ class App {
 
   private render() {
     this.controller.update();
+
+    this.box.position.set(
+      this.camera.position.x - 100,
+      this.camera.position.y - 100,
+      this.camera.position.z - 100
+    );
+
     this.renderer.render(this.scene, this.camera);
 
     this.adjustCanvasSize();
     this.adjustCameraLocation();
     this.adjustCameraZoom();
+
+    if (this.controller.isForwardPressed()) {
+      this.controls.pan(0, this.controls.getPanSpeed());
+    } else if (this.controller.isBackwardPressed()) {
+      this.controls.pan(0, -this.controls.getPanSpeed());
+    }
 
     this.controls.update();
 

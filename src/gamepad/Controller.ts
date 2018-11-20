@@ -29,6 +29,10 @@ export abstract class Controller implements ControllerInterface {
 
   abstract isRightViewPressed(): boolean;
 
+  abstract isForwardPressed(): boolean;
+
+  abstract isBackwardPressed(): boolean;
+
   update(): void {
     this.gamepad = this.navigator.getGamepads()[this.controllerIndex];
   }
@@ -45,7 +49,9 @@ export function createController(): ControllerInterface {
     if (gamepads[i]) {
       if (gamepads[i].id.startsWith('PLAYSTATION')) {
         return new Playstation3(i, navigator);
-      } else if (gamepads[i].id.startsWith('Saitek X52 Flight Control System')) {
+      } else if (
+        gamepads[i].id.startsWith('Saitek X52 Flight Control System')
+      ) {
         return new SaitekX52(i, navigator);
       }
     }

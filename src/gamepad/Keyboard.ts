@@ -75,6 +75,14 @@ export class Keyboard implements ControllerInterface {
   isRightViewPressed(): boolean {
     return this.activeKeys.get('KeyR');
   }
+
+  isForwardPressed(): boolean {
+    throw new Error('Method not implemented.');
+  }
+
+  isBackwardPressed(): boolean {
+    throw new Error('Method not implemented.');
+  }
 }
 
 class EventHandler {

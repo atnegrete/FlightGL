@@ -2,7 +2,6 @@ import { ControllerInterface } from './ControllerInterface';
 import { Controller } from './Controller';
 
 export class SaitekX52 extends Controller implements ControllerInterface {
-
   getYaw(): number {
     return Number.parseFloat(this.gamepad.axes[5].toFixed(2));
   }
@@ -34,7 +33,16 @@ export class SaitekX52 extends Controller implements ControllerInterface {
   isLeftViewPressed(): boolean {
     return this.gamepad.buttons[14].pressed;
   }
+
   isRightViewPressed(): boolean {
     return this.gamepad.buttons[15].pressed;
+  }
+
+  isForwardPressed(): boolean {
+    throw new Error('Method not implemented.');
+  }
+
+  isBackwardPressed(): boolean {
+    throw new Error('Method not implemented.');
   }
 }

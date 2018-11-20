@@ -377,6 +377,10 @@ export class OrbitControls extends THREE.EventDispatcher {
     }
   }
 
+  getPanSpeed() {
+    return this.keyPanSpeed;
+  }
+
   dollyIn(dollyScale: number) {
     if (this._checkPerspectiveCamera(this.object)) {
       this.scale /= dollyScale;

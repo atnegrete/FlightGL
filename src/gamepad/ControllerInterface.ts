@@ -18,4 +18,8 @@ export interface ControllerInterface {
   isRightViewPressed(): boolean;
 
   update(): void;
+
+  isForwardPressed(): boolean;
+
+  isBackwardPressed(): boolean;
 }
