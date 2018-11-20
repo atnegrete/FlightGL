@@ -160,7 +160,7 @@ class App {
     }
 
     this.controls.update();
-
+    
     this.box.rotateY(this.controller.getYaw() * this.SPEED_FACTOR);
     this.box.rotateX(this.controller.getPitch() * this.SPEED_FACTOR);
     this.box.rotateZ(this.controller.getRoll() * this.SPEED_FACTOR);
