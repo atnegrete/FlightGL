@@ -76,11 +76,19 @@ export class Keyboard implements ControllerInterface {
     return this.activeKeys.get('KeyR');
   }
 
+  isVariableThruster(): boolean {
+    return false;
+  }
+
   isForwardPressed(): boolean {
     throw new Error('Method not implemented.');
   }
 
   isBackwardPressed(): boolean {
+    throw new Error('Method not implemented.');
+  }
+
+  getThruster(): number {
     throw new Error('Method not implemented.');
   }
 }

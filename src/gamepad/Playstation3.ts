@@ -45,4 +45,8 @@ export class Playstation3 extends Controller implements ControllerInterface {
   isBackwardPressed(): boolean {
     return this.gamepad.buttons[7].pressed;
   }
+
+  getThruster(): number {
+    throw new Error('Method not implemented.');
+  }
 }

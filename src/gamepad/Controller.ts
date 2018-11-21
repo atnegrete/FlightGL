@@ -3,12 +3,14 @@ import { ControllerInterface } from './ControllerInterface';
 export abstract class Controller implements ControllerInterface {
   protected readonly navigator: Navigator;
   protected readonly controllerIndex: number;
+  protected readonly variableThruster: boolean;
 
   protected gamepad: Gamepad;
 
-  constructor(controllerIndex: number, navigator: Navigator) {
+  constructor(controllerIndex: number, navigator: Navigator, variableThruster: boolean) {
     this.controllerIndex = controllerIndex;
     this.navigator = navigator;
+    this.variableThruster = variableThruster;
   }
 
   abstract getYaw(): number;
@@ -29,10 +31,16 @@ export abstract class Controller implements ControllerInterface {
 
   abstract isRightViewPressed(): boolean;
 
+  isVariableThruster(): boolean {
+    return this.variableThruster;
+  }
+
   abstract isForwardPressed(): boolean;
 
   abstract isBackwardPressed(): boolean;
 
+  abstract getThruster(): number;
+  
   update(): void {
     this.gamepad = this.navigator.getGamepads()[this.controllerIndex];
   }
@@ -48,11 +56,11 @@ export function createController(): ControllerInterface {
   for (let i = 0; i < gamepads.length; i++) {
     if (gamepads[i]) {
       if (gamepads[i].id.startsWith('PLAYSTATION')) {
-        return new Playstation3(i, navigator);
+        return new Playstation3(i, navigator, false);
       } else if (
         gamepads[i].id.startsWith('Saitek X52 Flight Control System')
       ) {
-        return new SaitekX52(i, navigator);
+        return new SaitekX52(i, navigator, true);
       }
     }
   }
