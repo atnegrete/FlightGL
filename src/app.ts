@@ -193,8 +193,7 @@ class App {
 
       if (test < 0) {
         console.log(this.camera);
-      } 
-      
+      }
     }
     this.camera.rotateY(-this.controller.getYaw() * this.SPEED_FACTOR);
     this.camera.rotateX(this.controller.getPitch() * this.SPEED_FACTOR);
