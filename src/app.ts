@@ -1,4 +1,3 @@
-import { Box } from './models/Box';
 import { createController } from './gamepad/Controller';
 import { ControllerInterface } from './gamepad/ControllerInterface';
 import {
@@ -15,6 +14,7 @@ import {
   PointsMaterial,
   Points,
 } from 'three';
+import { Environment } from './models/Environment';
 
 enum VIEW {
   TOP_VIEW,
@@ -61,9 +61,9 @@ class App {
   // flightGL gamepad - end
 
   // flightGL objects - start
-  private box: Box;
   private warthog: Object3D;
   private boxes: any[] = [];
+  private environment: Environment;
   private view: VIEW = VIEW.NORMAL_VIEW;
   // flightGL objects - end
 
@@ -83,6 +83,8 @@ class App {
     this.renderer.setClearColor(this.BACKGROUND_COLOR);
     this.light.position.set(0, 1, 1).normalize();
     this.scene.add(this.light);
+
+    this.environment = new Environment(this.scene, this.camera, 500, 30, 8000);
 
     const loader = new ObjectLoader();
 
@@ -149,20 +151,20 @@ class App {
       if (this.view != VIEW.NORMAL_VIEW) return;
       this.view = VIEW.LEFT_VIEW;
       this.camera.lookAt(
-        this.box.position.x - 50,
-        this.box.position.y,
-        this.box.position.z
+        this.warthog.position.x - 50,
+        this.warthog.position.y,
+        this.warthog.position.z
       );
-      this.box.position.x = 50;
+      this.warthog.position.x = 50;
     } else if (this.controller.isRightViewPressed()) {
       if (this.view != VIEW.NORMAL_VIEW) return;
       this.view = VIEW.RIGHT_VIEW;
       this.camera.lookAt(
-        this.box.position.x + 50,
-        this.box.position.y,
-        this.box.position.z
+        this.warthog.position.x + 50,
+        this.warthog.position.y,
+        this.warthog.position.z
       );
-      this.box.position.x = -50;
+      this.warthog.position.x = -50;
     } else if (this.view != VIEW.NORMAL_VIEW) {
       console.log('NORMAL');
       this.view = VIEW.NORMAL_VIEW;
@@ -173,6 +175,7 @@ class App {
 
   private render() {
     this.controller.update();
+    this.environment.update();
 
     this.renderer.render(this.scene, this.camera);
 
@@ -193,8 +196,7 @@ class App {
 
       if (test < 0) {
         console.log(this.camera);
-      } 
-      
+      }
     }
     this.camera.rotateY(-this.controller.getYaw() * this.SPEED_FACTOR);
     this.camera.rotateX(this.controller.getPitch() * this.SPEED_FACTOR);

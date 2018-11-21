@@ -47,6 +47,10 @@ export class SaitekX52 extends Controller implements ControllerInterface {
   }
 
   getThruster(): number {
+<<<<<<< HEAD
     return (-this.gamepad.axes[2] + 1.00) / -2.00;
+=======
+    return (-this.gamepad.axes[2] + 1.0) / -2.0;
+>>>>>>> environment
   }
 }
