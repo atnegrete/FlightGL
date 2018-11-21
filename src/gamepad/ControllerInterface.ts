@@ -19,7 +19,11 @@ export interface ControllerInterface {
 
   update(): void;
 
+  isVariableThruster(): boolean;
+
   isForwardPressed(): boolean;
 
   isBackwardPressed(): boolean;
+
+  getThruster(): number;
 }

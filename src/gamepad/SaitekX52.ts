@@ -7,7 +7,7 @@ export class SaitekX52 extends Controller implements ControllerInterface {
   }
 
   getPitch(): number {
-    return Number.parseFloat(this.gamepad.axes[1].toFixed(2));
+    return Number.parseFloat(this.gamepad.axes[1].toFixed(1));
   }
 
   getRoll(): number {
@@ -44,5 +44,9 @@ export class SaitekX52 extends Controller implements ControllerInterface {
 
   isBackwardPressed(): boolean {
     throw new Error('Method not implemented.');
+  }
+
+  getThruster(): number {
+    return (-this.gamepad.axes[2] + 1.0) / -2.0;
   }
 }
