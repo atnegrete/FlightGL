@@ -91,10 +91,6 @@ export class Keyboard implements ControllerInterface {
   getThruster(): number {
     throw new Error('Method not implemented.');
   }
-
-  getThruster(): number {
-    throw new Error('Method not implemented.');
-  }
 }
 
 class EventHandler {

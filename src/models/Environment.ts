@@ -78,14 +78,8 @@ export class Environment {
   }
 
   update(): void {
-    const stars = 15;
-    const planets = 5;
-
-    const start = (this.tick * stars) % this.starsCount;
-    const size = Math.min(stars, this.stars.length - start);
-    console.log({ start, size });
     this.updateObjects(this.stars[this.tick % this.starsCount]);
-    // this.updateObjects(this.planets[this.tick % this.planetsCount]);
+    this.updateObjects(this.planets[this.tick % this.planetsCount]);
     this.tick++;
   }
 
@@ -93,12 +87,23 @@ export class Environment {
     // objects.forEach(obj => {
     if (obj && obj.position) {
       let distance = obj.position.distanceTo(this.player.position);
-      if (distance > this.radius / 2) {
-        console.log({ distance });
-        console.log(obj.position);
-        const updatedPos = this.geratePosition();
-        obj.position.set(updatedPos.x, updatedPos.y, updatedPos.z);
-        console.log(obj.position);
+      if (distance > this.radius * 0.7) {
+        let frustum = new THREE.Frustum();
+        let cameraViewProjectionMatrix = new THREE.Matrix4();
+        this.player.matrixWorldInverse.getInverse(this.player.matrixWorld);
+        cameraViewProjectionMatrix.multiplyMatrices(
+          this.player.projectionMatrix,
+          this.player.matrixWorldInverse
+        );
+        frustum.setFromMatrix(cameraViewProjectionMatrix);
+
+        if (!frustum.intersectsObject(obj)) {
+          console.log({ distance });
+          console.log(obj.position);
+          const updatedPos = this.geratePosition();
+          obj.position.set(updatedPos.x, updatedPos.y, updatedPos.z);
+          console.log(obj.position);
+        }
       }
     }
     // });
@@ -106,7 +111,7 @@ export class Environment {
   private geratePosition() {
     const x = this.player.position.x + this.getRandomNumber(this.radius);
     const y = this.player.position.y + this.getRandomNumber(this.radius);
-    const z = this.player.position.z + this.getRandomNumber(this.radius) + 300;
+    const z = this.player.position.z + this.getRandomNumber(this.radius);
     return new THREE.Vector3(x, y, z);
   }
 

@@ -84,7 +84,7 @@ class App {
     this.light.position.set(0, 1, 1).normalize();
     this.scene.add(this.light);
 
-    this.environment = new Environment(this.scene, this.camera, 500, 30, 8000);
+    this.environment = new Environment(this.scene, this.camera, 500, 10, 8000);
 
     const loader = new ObjectLoader();
 

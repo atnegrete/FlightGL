@@ -7,15 +7,11 @@ export abstract class Controller implements ControllerInterface {
 
   protected gamepad: Gamepad;
 
-<<<<<<< HEAD
-  constructor(controllerIndex: number, navigator: Navigator, variableThruster: boolean) {
-=======
   constructor(
     controllerIndex: number,
     navigator: Navigator,
     variableThruster: boolean
   ) {
->>>>>>> environment
     this.controllerIndex = controllerIndex;
     this.navigator = navigator;
     this.variableThruster = variableThruster;
@@ -48,11 +44,7 @@ export abstract class Controller implements ControllerInterface {
   abstract isBackwardPressed(): boolean;
 
   abstract getThruster(): number;
-<<<<<<< HEAD
-  
-=======
 
->>>>>>> environment
   update(): void {
     this.gamepad = this.navigator.getGamepads()[this.controllerIndex];
   }
