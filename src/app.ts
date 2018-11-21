@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
-import { Box } from './models/Box';
+import { Star } from './models/Star';
 import { createController } from './gamepad/Controller';
-import { OrbitControls } from './controller/OrbitControls';
 import { ControllerInterface } from './gamepad/ControllerInterface';
+import { Environment } from './models/Environment';
 
 enum VIEW {
   TOP_VIEW,
@@ -27,21 +27,14 @@ class App {
     0.1,
     10000
   );
-  // private readonly controls = new OrbitControls(
-  //   this.camera,
-  //   this.renderer.domElement
-  // );
+  private environment: Environment;
+
   private readonly light = new THREE.DirectionalLight(0xffffff, 1);
 
-  private box: Box;
+  private box: Star;
   private boxes: any[];
   private view: VIEW;
   private controller: ControllerInterface;
-  private currentPositionVector: THREE.Vector3 = <THREE.Vector3>{
-    x: 200,
-    y: 200,
-    z: 200,
-  };
 
   constructor() {
     this.controller = createController();
@@ -56,10 +49,10 @@ class App {
 
     this.view = VIEW.NORMAL_VIEW;
 
-    this.camera.position.set(200, 200, 200);
+    this.camera.position.set(0, 0, 0);
     this.scene.add(this.camera);
 
-    this.box = new Box();
+    this.box = new Star();
     this.box.position.set(0, 0, -250);
     this.camera.add(this.box);
 
@@ -68,12 +61,14 @@ class App {
     this.light.position.set(0, 1, 1).normalize();
     this.scene.add(this.light);
 
+    this.environment = new Environment(this.scene, 200, 15, 5000);
+
     this.render();
   }
 
   private generateBoxes() {
     for (let i = 0; i < 10; ++i) {
-      let box = new Box();
+      let box = new Star();
       box.geometry.scale(1, 1, 1);
       box.position.set(
         this.getRandomNumber(),

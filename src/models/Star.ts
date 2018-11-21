@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { MeshBasicMaterial } from 'three';
 
-export class Box extends THREE.Mesh {
+export class Star extends THREE.Mesh {
   private cubeFaces: MeshBasicMaterial[];
 
   constructor() {
