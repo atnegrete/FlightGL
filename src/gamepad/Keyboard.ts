@@ -81,11 +81,11 @@ export class Keyboard implements ControllerInterface {
   }
 
   isForwardPressed(): boolean {
-    throw new Error('Method not implemented.');
+    return this.isZoomIn();
   }
 
   isBackwardPressed(): boolean {
-    throw new Error('Method not implemented.');
+    return this.isZoomOut();
   }
 
   getThruster(): number {

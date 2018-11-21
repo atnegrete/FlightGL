@@ -1,21 +1,16 @@
 import * as THREE from 'three';
-import { Mesh } from 'three';
 
 export class Planet extends THREE.Mesh {
-  private mesh: Mesh[];
-  private planetTextures: [];
-
-  constructor(texture: string) {
+  constructor(texture: THREE.Texture, scene: THREE.Scene) {
     super();
-    this.planetTextures = [];
-    this.generateBasicMaterial(texture);
+    this.generateBasicMaterial(texture, scene);
   }
 
-  generateBasicMaterial(texture: string) {
-    let geometry = new THREE.SphereGeometry(0.5, 32, 32);
-    let material = new THREE.MeshPhongMaterial();
-    let mesh = new THREE.Mesh(geometry, material);
-    // material.map    = THREE.ImageUtils.loadTexture('images/earthmap1k.jpg')
-    material.map = THREE.ImageUtils.loadTexture(texture);
+  generateBasicMaterial(texture: THREE.Texture, scene: THREE.Scene) {
+    this.geometry = new THREE.SphereGeometry(500, 25, 25);
+    this.material = new THREE.MeshBasicMaterial({
+      map: texture,
+      overdraw: 0.5,
+    });
   }
 }

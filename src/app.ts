@@ -14,6 +14,7 @@ import {
   PointsMaterial,
   Points,
 } from 'three';
+import { Environment } from './models/Environment';
 
 enum VIEW {
   TOP_VIEW,
@@ -62,6 +63,7 @@ class App {
   // flightGL objects - start
   private warthog: Object3D;
   private boxes: any[] = [];
+  private environment: Environment;
   private view: VIEW = VIEW.NORMAL_VIEW;
   // flightGL objects - end
 
@@ -81,6 +83,8 @@ class App {
     this.renderer.setClearColor(this.BACKGROUND_COLOR);
     this.light.position.set(0, 1, 1).normalize();
     this.scene.add(this.light);
+
+    this.environment = new Environment(this.scene, this.camera, 500, 30, 8000);
 
     const loader = new ObjectLoader();
 
@@ -171,6 +175,7 @@ class App {
 
   private render() {
     this.controller.update();
+    this.environment.update();
 
     this.renderer.render(this.scene, this.camera);
 
