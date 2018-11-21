@@ -115,11 +115,11 @@ class App {
   private generateStars() {
     var starsGeometry = new Geometry();
 
-    for (var i = 0; i < 10000; i++) {
+    for (var i = 0; i < 10000000; i++) {
       var star = new Vector3();
-      star.x = THREEMATH.randFloatSpread(2000);
-      star.y = THREEMATH.randFloatSpread(2000);
-      star.z = THREEMATH.randFloatSpread(2000);
+      star.x = THREEMATH.randFloatSpread(100000);
+      star.y = THREEMATH.randFloatSpread(100000);
+      star.z = THREEMATH.randFloatSpread(100000);
 
       starsGeometry.vertices.push(star);
     }

@@ -78,8 +78,8 @@ export class Environment {
   }
 
   update(): void {
-    this.updateObjects(this.stars[this.tick % this.starsCount]);
-    this.updateObjects(this.planets[this.tick % this.planetsCount]);
+    // this.updateObjects(this.stars[this.tick % this.starsCount]);
+    // this.updateObjects(this.planets[this.tick % this.planetsCount]);
     this.tick++;
   }
 
