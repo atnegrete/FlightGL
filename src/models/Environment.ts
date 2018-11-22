@@ -1,38 +1,43 @@
 import * as THREE from 'three';
-import { Star } from './Star';
+import { Asteroid } from './Asteroid';
 import { Planet } from './Planet';
 import { Texture } from 'three';
 import { generateKeyPair } from 'crypto';
+import { spawn } from 'child_process';
 
 export class Environment {
-  public stars: Star[];
+  public asteroids: Asteroid[][];
   public planets: Planet[];
   private radius: number;
-  private starsCount: number;
+  private asteroidsCount: number;
   private planetsCount: number;
   private scene: THREE.Scene;
   private planetTextures: Texture[];
+  private asteroidTextures: Texture[];
   private player: THREE.PerspectiveCamera;
   private tick: number;
+  private static divisor = 20;
+  private static planetsRadiusMultiplier = 3.5;
 
   constructor(
     scene: THREE.Scene,
     player: THREE.PerspectiveCamera,
-    stars: number,
+    asteroids: number,
     planets: number,
     radius: number
   ) {
     this.scene = scene;
     this.player = player;
     this.radius = radius;
-    this.starsCount = stars;
+    this.asteroidsCount = asteroids;
     this.planetsCount = planets;
     this.tick = 0;
-    this.initStars();
 
     this.planetTextures = [];
+    this.asteroidTextures = [];
     this.loadTextures();
     this.initPlanets();
+    this.initAsteroids();
   }
 
   loadTextures() {
@@ -42,20 +47,29 @@ export class Environment {
     this.planetTextures.push(loader.load('src/textures/mars.jpg'));
     this.planetTextures.push(loader.load('src/textures/venus.jpg'));
     this.planetTextures.push(loader.load('src/textures/mercury.jpg'));
+    this.asteroidTextures.push(loader.load('src/textures/asteroid1.jpg'));
+    this.asteroidTextures.push(loader.load('src/textures/asteroid2.png'));
+    this.asteroidTextures.push(loader.load('src/textures/asteroid3.jpg'));
+    this.asteroidTextures.push(loader.load('src/textures/asteroid4.jpg'));
   }
 
-  initStars(): any {
-    this.stars = [];
-    for (let i = 0; i < this.starsCount; ++i) {
-      let star = new Star();
-      star.geometry.scale(1, 1, 1);
-      star.position.set(
-        this.getRandomNumber(this.radius / 4),
-        this.getRandomNumber(this.radius / 4),
-        this.getRandomNumber(this.radius / 4)
-      );
-      this.stars.push(star);
-      this.scene.add(this.stars[i]);
+  initAsteroids(): any {
+    this.asteroids = [];
+    for (let i = 0; i < Environment.divisor; ++i) {
+      this.asteroids[i] = [];
+      for (let j = 0; j < this.asteroidsCount / Environment.divisor; ++j) {
+        let asteroid = new Asteroid(
+          this.asteroidTextures[Environment.randomIntFromInterval(0, 3)]
+        );
+        asteroid.geometry.scale(1, 1, 1);
+        asteroid.position.set(
+          this.getRandomNumber(this.radius),
+          this.getRandomNumber(this.radius),
+          this.getRandomNumber(this.radius)
+        );
+        this.asteroids[i][j] = asteroid;
+        this.scene.add(this.asteroids[i][j]);
+      }
     }
   }
 
@@ -63,14 +77,13 @@ export class Environment {
     this.planets = [];
     for (let i = 0; i < this.planetsCount; ++i) {
       let planet = new Planet(
-        this.planetTextures[Math.floor(Math.random() * 6)],
-        this.scene
+        this.planetTextures[Environment.randomIntFromInterval(0, 4)]
       );
       planet.geometry.scale(1, 1, 1);
       planet.position.set(
-        this.getRandomNumber(this.radius),
-        this.getRandomNumber(this.radius),
-        this.getRandomNumber(this.radius)
+        this.getRandomNumber(this.radius * Environment.planetsRadiusMultiplier),
+        this.getRandomNumber(this.radius * Environment.planetsRadiusMultiplier),
+        this.getRandomNumber(this.radius * Environment.planetsRadiusMultiplier)
       );
       this.planets.push(planet);
       this.scene.add(this.planets[i]);
@@ -78,16 +91,24 @@ export class Environment {
   }
 
   update(): void {
-    // this.updateObjects(this.stars[this.tick % this.starsCount]);
-    // this.updateObjects(this.planets[this.tick % this.planetsCount]);
+    this.updateObjects(this.asteroids[this.tick % 10], this.radius);
+    this.updateObject(
+      this.planets[this.tick % this.planetsCount],
+      this.radius * Environment.planetsRadiusMultiplier
+    );
     this.tick++;
   }
 
-  updateObjects(obj: any) {
-    // objects.forEach(obj => {
+  updateObjects(objects: any[], spawnDistance: number) {
+    objects.forEach(obj => {
+      this.updateObject(obj, spawnDistance);
+    });
+  }
+
+  updateObject(obj: any, spawnDistance: number) {
     if (obj && obj.position) {
       let distance = obj.position.distanceTo(this.player.position);
-      if (distance > this.radius * 0.7) {
+      if (distance > spawnDistance * 0.55) {
         let frustum = new THREE.Frustum();
         let cameraViewProjectionMatrix = new THREE.Matrix4();
         this.player.matrixWorldInverse.getInverse(this.player.matrixWorld);
@@ -98,25 +119,25 @@ export class Environment {
         frustum.setFromMatrix(cameraViewProjectionMatrix);
 
         if (!frustum.intersectsObject(obj)) {
-          console.log({ distance });
-          console.log(obj.position);
-          const updatedPos = this.geratePosition();
+          const updatedPos = this.geratePosition(spawnDistance);
           obj.position.set(updatedPos.x, updatedPos.y, updatedPos.z);
-          console.log(obj.position);
         }
       }
     }
-    // });
   }
-  private geratePosition() {
-    const x = this.player.position.x + this.getRandomNumber(this.radius);
-    const y = this.player.position.y + this.getRandomNumber(this.radius);
-    const z = this.player.position.z + this.getRandomNumber(this.radius);
+  private geratePosition(distance: number) {
+    const x = this.player.position.x + this.getRandomNumber(distance);
+    const y = this.player.position.y + this.getRandomNumber(distance);
+    const z = this.player.position.z + this.getRandomNumber(distance);
     return new THREE.Vector3(x, y, z);
   }
 
   private getRandomNumber(max: number) {
     let num = Math.random() * max;
     return Math.random() > 0.5 ? num : -num;
+  }
+
+  static randomIntFromInterval(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
   }
 }

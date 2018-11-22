@@ -84,7 +84,7 @@ class App {
     this.light.position.set(0, 1, 1).normalize();
     this.scene.add(this.light);
 
-    this.environment = new Environment(this.scene, this.camera, 500, 10, 8000);
+    this.environment = new Environment(this.scene, this.camera, 1000, 6, 16000);
 
     const loader = new ObjectLoader();
 
@@ -115,11 +115,11 @@ class App {
   private generateStars() {
     var starsGeometry = new Geometry();
 
-    for (var i = 0; i < 10000000; i++) {
+    for (var i = 0; i < 5000000; i++) {
       var star = new Vector3();
-      star.x = THREEMATH.randFloatSpread(100000);
-      star.y = THREEMATH.randFloatSpread(100000);
-      star.z = THREEMATH.randFloatSpread(100000);
+      star.x = THREEMATH.randFloatSpread(20000);
+      star.y = THREEMATH.randFloatSpread(20000);
+      star.z = THREEMATH.randFloatSpread(20000);
 
       starsGeometry.vertices.push(star);
     }
