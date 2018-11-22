@@ -62,7 +62,7 @@ class App {
 
   // flightGL objects - start
   private warthog: Object3D;
-  private boxes: any[] = [];
+  private readonly modelMaxRotation = 15.0 / 360.0;
   private environment: Environment;
   private view: VIEW = VIEW.NORMAL_VIEW;
   // flightGL objects - end
@@ -201,6 +201,31 @@ class App {
     this.camera.rotateY(-this.controller.getYaw() * this.SPEED_FACTOR);
     this.camera.rotateX(this.controller.getPitch() * this.SPEED_FACTOR);
     this.camera.rotateZ(-this.controller.getRoll() * this.SPEED_FACTOR);
+
+    const yaw = Math.min(
+      this.controller.getYaw() * this.SPEED_FACTOR,
+      this.modelMaxRotation
+    );
+    const pitch = Math.min(
+      this.controller.getPitch() * this.SPEED_FACTOR,
+      this.modelMaxRotation
+    );
+    const roll = Math.min(
+      this.controller.getRoll() * this.SPEED_FACTOR,
+      this.modelMaxRotation
+    );
+
+    this.warthog.setRotationFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2);
+    this.warthog.rotateOnAxis(new Vector3(0, 0, 1), 0.35);
+
+    this.warthog.rotateOnAxis(new Vector3(0, 1, 0), -(yaw * 10));
+    this.warthog.rotateOnAxis(new Vector3(0, 0, 1), pitch * 10);
+    this.warthog.rotateOnAxis(new Vector3(1, 0, 0), (yaw || roll) * 10);
+
+    // this.warthog.rotateX(pitch);
+    // this.warthog.rotateZ(-roll);
+
+    // this.warthog.rotateOnAxis(new Vector3(0, 0, 1), 0.35);
 
     requestAnimationFrame(() => {
       this.render();

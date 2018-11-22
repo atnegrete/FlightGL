@@ -16,8 +16,8 @@ export class Environment {
   private asteroidTextures: Texture[];
   private player: THREE.PerspectiveCamera;
   private tick: number;
-  private static divisor = 20;
-  private static planetsRadiusMultiplier = 3.5;
+  private readonly divisor = 20;
+  private readonly planetsRadiusMultiplier = 3.5;
 
   constructor(
     scene: THREE.Scene,
@@ -55,9 +55,9 @@ export class Environment {
 
   initAsteroids(): any {
     this.asteroids = [];
-    for (let i = 0; i < Environment.divisor; ++i) {
+    for (let i = 0; i < this.divisor; ++i) {
       this.asteroids[i] = [];
-      for (let j = 0; j < this.asteroidsCount / Environment.divisor; ++j) {
+      for (let j = 0; j < this.asteroidsCount / this.divisor; ++j) {
         let asteroid = new Asteroid(
           this.asteroidTextures[Environment.randomIntFromInterval(0, 3)]
         );
@@ -81,9 +81,9 @@ export class Environment {
       );
       planet.geometry.scale(1, 1, 1);
       planet.position.set(
-        this.getRandomNumber(this.radius * Environment.planetsRadiusMultiplier),
-        this.getRandomNumber(this.radius * Environment.planetsRadiusMultiplier),
-        this.getRandomNumber(this.radius * Environment.planetsRadiusMultiplier)
+        this.getRandomNumber(this.radius * this.planetsRadiusMultiplier),
+        this.getRandomNumber(this.radius * this.planetsRadiusMultiplier),
+        this.getRandomNumber(this.radius * this.planetsRadiusMultiplier)
       );
       this.planets.push(planet);
       this.scene.add(this.planets[i]);
@@ -94,7 +94,7 @@ export class Environment {
     this.updateObjects(this.asteroids[this.tick % 10], this.radius);
     this.updateObject(
       this.planets[this.tick % this.planetsCount],
-      this.radius * Environment.planetsRadiusMultiplier
+      this.radius * this.planetsRadiusMultiplier
     );
     this.tick++;
   }

@@ -20,16 +20,22 @@ export class Keyboard implements ControllerInterface {
   setKey(keyCode: string, isActive: boolean): void {
     if (keyCode == 'KeyW') {
       if (isActive) this.pitch = Math.min(1.0, this.pitch + Keyboard.rate);
+      else this.pitch = 0;
     } else if (keyCode == 'KeyS') {
       if (isActive) this.pitch = Math.max(-1.0, this.pitch - Keyboard.rate);
+      else this.pitch = 0;
     } else if (keyCode == 'KeyA') {
       if (isActive) this.roll = Math.min(1.0, this.roll + Keyboard.rate);
+      else this.roll = 0;
     } else if (keyCode == 'KeyD') {
       if (isActive) this.roll = Math.max(-1.0, this.roll - Keyboard.rate);
+      else this.roll = 0;
     } else if (keyCode == 'KeyQ') {
       if (isActive) this.yaw = Math.min(1.0, this.yaw + Keyboard.rate);
+      else this.yaw = 0;
     } else if (keyCode == 'KeyE') {
       if (isActive) this.yaw = Math.max(-1.0, this.yaw - Keyboard.rate);
+      else this.yaw = 0;
     } else {
       this.activeKeys.set(keyCode, isActive);
     }
