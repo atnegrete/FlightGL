@@ -39,7 +39,7 @@ export class SaitekX52 extends Controller implements ControllerInterface {
   }
 
   isForwardPressed(): boolean {
-    throw new Error('Method not implemented.');
+    return this.gamepad.buttons[0].pressed;
   }
 
   isBackwardPressed(): boolean {

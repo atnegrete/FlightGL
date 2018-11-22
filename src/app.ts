@@ -28,6 +28,7 @@ const DEGREE_TO_RADIANS = 0.0174533;
 // flightGL conversion factors - start
 
 // flightGl constants - start
+const DRAG = 0.8;
 const DISTANCE = -250;
 const DISTANCE_MULTIPLYIER = 100;
 // flightGl constants - end
@@ -37,7 +38,7 @@ class App {
   private readonly YAW_FACTOR = 0.005;
   private readonly PITCH_FACTOR = 0.01;
   private readonly ROLL_FACTOR = 0.02;
-  private readonly THRUSTER_FACTOR = 10;
+  private readonly THRUSTER_FACTOR = 50;
   // flightGL related weights - end
 
   // flightGL colors - start
@@ -59,7 +60,7 @@ class App {
     60,
     innerWidth / innerHeight,
     0.1,
-    10000
+    100000
   );
   // flightGL webGL - end
 
@@ -68,11 +69,13 @@ class App {
   // flightGL gamepad - end
 
   // flightGL objects - start
-  private warthog: Object3D;
+  private tieFighter: Object3D;
   private readonly modelMaxRotation = 15.0 / 360.0;
   private environment: Environment;
   private view: VIEW = VIEW.NORMAL_VIEW;
   // flightGL objects - end
+
+  private velocity = -1;
 
   constructor() {
     this.controller = createController();
@@ -100,10 +103,10 @@ class App {
 
       obj => {
         console.log({ obj });
-        this.warthog = obj;
-        this.warthog.scale.set(10, 10, 10);
-        this.warthog.position.set(0, 0, DISTANCE);
-        this.camera.add(this.warthog);
+        this.tieFighter = obj;
+        this.tieFighter.scale.set(10, 10, 10);
+        this.tieFighter.position.set(0, 0, DISTANCE);
+        this.camera.add(this.tieFighter);
         this.render();
       },
 
@@ -143,7 +146,7 @@ class App {
 
   private adjustCameraLocation() {
     const distance = this.controller.getZoomFactor() * DISTANCE_MULTIPLYIER;
-    this.warthog.position.z = DISTANCE + distance;
+    this.tieFighter.position.z = DISTANCE + distance;
   }
 
   private render() {
@@ -162,14 +165,13 @@ class App {
         this.camera.translateZ(-10);
       }
     } else {
-      var test = this.controller.getThruster();
-      this.camera.translateZ(
-        this.controller.getThruster() * this.THRUSTER_FACTOR
-      );
-
-      if (test < 0) {
-        console.log(this.camera);
-      }
+      const lightSpeed = this.controller.isForwardPressed() ? -500 : 0;
+      const thrust = this.controller.getThruster();
+      if (thrust == 0) this.velocity += DRAG;
+      else this.velocity += thrust;
+      this.velocity = Math.min(this.velocity, -1);
+      this.velocity = Math.max(this.velocity, -100);
+      this.camera.translateZ(this.velocity + lightSpeed);
     }
     this.camera.rotateY(-this.controller.getYaw() * this.YAW_FACTOR);
     this.camera.rotateX(this.controller.getPitch() * this.PITCH_FACTOR);
@@ -188,12 +190,12 @@ class App {
       this.modelMaxRotation
     );
 
-    this.warthog.setRotationFromAxisAngle(new Vector3(0, 1, 0), 0);
+    this.tieFighter.setRotationFromAxisAngle(new Vector3(0, 1, 0), 0);
     // this.warthog.rotateOnAxis(new Vector3(0, 0, 1), 0.35);
 
-    this.warthog.rotateOnAxis(new Vector3(0, 1, 0), -(yaw * 30));
-    this.warthog.rotateOnAxis(new Vector3(1, 0, 0), pitch * 30);
-    this.warthog.rotateOnAxis(new Vector3(0, 0, 1), -(roll) * 30);
+    this.tieFighter.rotateOnAxis(new Vector3(0, 1, 0), -(yaw * 30));
+    this.tieFighter.rotateOnAxis(new Vector3(1, 0, 0), pitch * 30);
+    this.tieFighter.rotateOnAxis(new Vector3(0, 0, 1), -roll * 30);
 
     // this.warthog.rotateX(pitch);
     // this.warthog.rotateZ(-roll);
