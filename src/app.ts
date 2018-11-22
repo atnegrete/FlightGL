@@ -16,10 +16,6 @@ import {
 } from 'three';
 import { Environment } from './models/Environment';
 
-var aX = [1000];
-var aY = [1000];
-var aZ = [1000];
-
 enum VIEW {
   TOP_VIEW,
   BOTTOM_VIEW,
@@ -30,6 +26,11 @@ enum VIEW {
 // flightGL conversion factors - start
 const DEGREE_TO_RADIANS = 0.0174533;
 // flightGL conversion factors - start
+
+// flightGl constants - start
+const DISTANCE = -250;
+const DISTANCE_MULTIPLYIER = 100;
+// flightGl constants - end
 
 class App {
   // flightGL related weights - start
@@ -101,7 +102,7 @@ class App {
         console.log({ obj });
         this.warthog = obj;
         this.warthog.scale.set(10, 10, 10);
-        this.warthog.position.set(0, 0, -250);
+        this.warthog.position.set(0, 0, DISTANCE);
         this.camera.add(this.warthog);
         this.render();
       },
@@ -141,40 +142,8 @@ class App {
   }
 
   private adjustCameraLocation() {
-    if (this.controller.isTopViewPressed()) {
-      // if (this.view != VIEW.NORMAL_VIEW) return;
-      // this.view = VIEW.TOP_VIEW;
-      // this.controls.rotateUp(1);
-      // console.log('TOP');
-    } else if (this.controller.isBottomViewPressed()) {
-      // if (this.view != VIEW.NORMAL_VIEW) return;
-      // this.view = VIEW.BOTTOM_VIEW;
-      // this.controls.rotateUp(-1);
-      // console.log('BOTTOM');
-    } else if (this.controller.isLeftViewPressed()) {
-      if (this.view != VIEW.NORMAL_VIEW) return;
-      this.view = VIEW.LEFT_VIEW;
-      this.camera.lookAt(
-        this.warthog.position.x - 50,
-        this.warthog.position.y,
-        this.warthog.position.z
-      );
-      this.warthog.position.x = 50;
-    } else if (this.controller.isRightViewPressed()) {
-      if (this.view != VIEW.NORMAL_VIEW) return;
-      this.view = VIEW.RIGHT_VIEW;
-      this.camera.lookAt(
-        this.warthog.position.x + 50,
-        this.warthog.position.y,
-        this.warthog.position.z
-      );
-      this.warthog.position.x = -50;
-    } else if (this.view != VIEW.NORMAL_VIEW) {
-      console.log('NORMAL');
-      this.view = VIEW.NORMAL_VIEW;
-      this.warthog.position.x = 0;
-      this.camera.lookAt(this.warthog.position);
-    }
+    const distance = this.controller.getZoomFactor() * DISTANCE_MULTIPLYIER;
+    this.warthog.position.z = DISTANCE + distance;
   }
 
   private render() {
@@ -224,7 +193,7 @@ class App {
 
     this.warthog.rotateOnAxis(new Vector3(0, 1, 0), -(yaw * 30));
     this.warthog.rotateOnAxis(new Vector3(1, 0, 0), pitch * 30);
-    this.warthog.rotateOnAxis(new Vector3(0, 0, 1), (yaw || roll) * 30);
+    this.warthog.rotateOnAxis(new Vector3(0, 0, 1), -(roll) * 30);
 
     // this.warthog.rotateX(pitch);
     // this.warthog.rotateZ(-roll);

@@ -43,6 +43,8 @@ export abstract class Controller implements ControllerInterface {
 
   abstract isBackwardPressed(): boolean;
 
+  abstract getZoomFactor(): number;
+  
   abstract getThruster(): number;
 
   update(): void {

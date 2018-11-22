@@ -25,5 +25,7 @@ export interface ControllerInterface {
 
   isBackwardPressed(): boolean;
 
+  getZoomFactor(): number;
+  
   getThruster(): number;
 }

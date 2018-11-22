@@ -46,6 +46,11 @@ export class Playstation3 extends Controller implements ControllerInterface {
     return this.gamepad.buttons[7].pressed;
   }
 
+  getZoomFactor(): number {
+    console.log("No zoom on PLaystation 3");
+    return 0;
+  }
+
   getThruster(): number {
     throw new Error('Method not implemented.');
   }

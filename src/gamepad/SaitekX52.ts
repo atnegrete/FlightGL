@@ -46,6 +46,10 @@ export class SaitekX52 extends Controller implements ControllerInterface {
     throw new Error('Method not implemented.');
   }
 
+  getZoomFactor(): number {
+    return (-this.gamepad.axes[4] + 1.0) / -2.0;
+  }
+
   getThruster(): number {
     return (-this.gamepad.axes[2] + 1.0) / -2.0;
   }

@@ -94,6 +94,11 @@ export class Keyboard implements ControllerInterface {
     return this.isZoomOut();
   }
 
+  getZoomFactor(): number {
+    console.log("No zoom on Keyboard");
+    return 0;
+  }
+
   getThruster(): number {
     throw new Error('Method not implemented.');
   }
