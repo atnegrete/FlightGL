@@ -37,7 +37,7 @@ export class Keyboard implements ControllerInterface {
     const pitch = this.pitch;
     const roll = this.roll;
     const yaw = this.yaw;
-    console.log({ keys, pitch, roll, yaw });
+    // console.log({ keys, pitch, roll, yaw });
   }
 
   getPitch(): number {

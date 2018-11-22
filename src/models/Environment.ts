@@ -5,7 +5,7 @@ import { Texture } from 'three';
 import { generateKeyPair } from 'crypto';
 
 export class Environment {
-  public stars: Star[];
+  public stars: Star[][];
   public planets: Planet[];
   private radius: number;
   private starsCount: number;
@@ -46,16 +46,19 @@ export class Environment {
 
   initStars(): any {
     this.stars = [];
-    for (let i = 0; i < this.starsCount; ++i) {
-      let star = new Star();
-      star.geometry.scale(1, 1, 1);
-      star.position.set(
-        this.getRandomNumber(this.radius / 4),
-        this.getRandomNumber(this.radius / 4),
-        this.getRandomNumber(this.radius / 4)
-      );
-      this.stars.push(star);
-      this.scene.add(this.stars[i]);
+    for (let i = 0; i < 10; ++i) {
+      this.stars[i] = [];
+      for (let j = 0; j < this.starsCount / 10; ++j) {
+        let star = new Star();
+        star.geometry.scale(1, 1, 1);
+        star.position.set(
+          this.getRandomNumber(this.radius / 4),
+          this.getRandomNumber(this.radius / 4),
+          this.getRandomNumber(this.radius / 4)
+        );
+        this.stars[i][j] = star;
+        this.scene.add(this.stars[i][j]);
+      }
     }
   }
 
@@ -78,13 +81,18 @@ export class Environment {
   }
 
   update(): void {
-    // this.updateObjects(this.stars[this.tick % this.starsCount]);
-    // this.updateObjects(this.planets[this.tick % this.planetsCount]);
+    this.updateObjects(this.stars[this.tick % 10]);
+    this.updateObject(this.planets[this.tick % this.planetsCount]);
     this.tick++;
   }
 
-  updateObjects(obj: any) {
-    // objects.forEach(obj => {
+  updateObjects(objects: any[]) {
+    objects.forEach(obj => {
+      this.updateObject(obj);
+    });
+  }
+
+  updateObject(obj: any) {
     if (obj && obj.position) {
       let distance = obj.position.distanceTo(this.player.position);
       if (distance > this.radius * 0.7) {
@@ -98,15 +106,14 @@ export class Environment {
         frustum.setFromMatrix(cameraViewProjectionMatrix);
 
         if (!frustum.intersectsObject(obj)) {
-          console.log({ distance });
-          console.log(obj.position);
+          // console.log({ distance });
+          // console.log(obj.position);
           const updatedPos = this.geratePosition();
           obj.position.set(updatedPos.x, updatedPos.y, updatedPos.z);
-          console.log(obj.position);
+          // console.log(obj.position);
         }
       }
     }
-    // });
   }
   private geratePosition() {
     const x = this.player.position.x + this.getRandomNumber(this.radius);
