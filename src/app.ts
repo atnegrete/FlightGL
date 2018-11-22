@@ -16,6 +16,10 @@ import {
 } from 'three';
 import { Environment } from './models/Environment';
 
+var aX = [1000];
+var aY = [1000];
+var aZ = [1000];
+
 enum VIEW {
   TOP_VIEW,
   BOTTOM_VIEW,
@@ -29,7 +33,9 @@ const DEGREE_TO_RADIANS = 0.0174533;
 
 class App {
   // flightGL related weights - start
-  private readonly SPEED_FACTOR = 0.03;
+  private readonly YAW_FACTOR = 0.005;
+  private readonly PITCH_FACTOR = 0.01;
+  private readonly ROLL_FACTOR = 0.02;
   private readonly THRUSTER_FACTOR = 10;
   // flightGL related weights - end
 
@@ -89,13 +95,11 @@ class App {
     const loader = new ObjectLoader();
 
     loader.load(
-      'src/models/Warthog.json',
+      'src/models/starwars-tie-fighter.json',
 
       obj => {
         console.log({ obj });
         this.warthog = obj;
-        this.warthog.rotateY(90 * DEGREE_TO_RADIANS);
-        this.warthog.rotateZ(15 * DEGREE_TO_RADIANS);
         this.warthog.scale.set(10, 10, 10);
         this.warthog.position.set(0, 0, -250);
         this.camera.add(this.warthog);
@@ -198,9 +202,9 @@ class App {
         console.log(this.camera);
       }
     }
-    this.camera.rotateY(-this.controller.getYaw() * this.SPEED_FACTOR);
-    this.camera.rotateX(this.controller.getPitch() * this.SPEED_FACTOR);
-    this.camera.rotateZ(-this.controller.getRoll() * this.SPEED_FACTOR);
+    this.camera.rotateY(-this.controller.getYaw() * this.YAW_FACTOR);
+    this.camera.rotateX(this.controller.getPitch() * this.PITCH_FACTOR);
+    this.camera.rotateZ(-this.controller.getRoll() * this.ROLL_FACTOR);
 
     const yaw = Math.min(
       this.controller.getYaw() * this.SPEED_FACTOR,
