@@ -207,24 +207,24 @@ class App {
     this.camera.rotateZ(-this.controller.getRoll() * this.ROLL_FACTOR);
 
     const yaw = Math.min(
-      this.controller.getYaw() * this.SPEED_FACTOR,
+      this.controller.getYaw() * this.YAW_FACTOR,
       this.modelMaxRotation
     );
     const pitch = Math.min(
-      this.controller.getPitch() * this.SPEED_FACTOR,
+      this.controller.getPitch() * this.PITCH_FACTOR,
       this.modelMaxRotation
     );
     const roll = Math.min(
-      this.controller.getRoll() * this.SPEED_FACTOR,
+      this.controller.getRoll() * this.ROLL_FACTOR,
       this.modelMaxRotation
     );
 
-    this.warthog.setRotationFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2);
-    this.warthog.rotateOnAxis(new Vector3(0, 0, 1), 0.35);
+    this.warthog.setRotationFromAxisAngle(new Vector3(0, 1, 0), 0);
+    // this.warthog.rotateOnAxis(new Vector3(0, 0, 1), 0.35);
 
-    this.warthog.rotateOnAxis(new Vector3(0, 1, 0), -(yaw * 10));
-    this.warthog.rotateOnAxis(new Vector3(0, 0, 1), pitch * 10);
-    this.warthog.rotateOnAxis(new Vector3(1, 0, 0), (yaw || roll) * 10);
+    this.warthog.rotateOnAxis(new Vector3(0, 1, 0), -(yaw * 30));
+    this.warthog.rotateOnAxis(new Vector3(1, 0, 0), pitch * 30);
+    this.warthog.rotateOnAxis(new Vector3(0, 0, 1), (yaw || roll) * 30);
 
     // this.warthog.rotateX(pitch);
     // this.warthog.rotateZ(-roll);
