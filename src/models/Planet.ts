@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 
 export class Planet extends THREE.Mesh {
-  constructor(texture: THREE.Texture, scene: THREE.Scene) {
+  constructor(texture: THREE.Texture) {
     super();
-    this.generateBasicMaterial(texture, scene);
+    this.generateBasicMaterial(texture);
   }
 
-  generateBasicMaterial(texture: THREE.Texture, scene: THREE.Scene) {
-    this.geometry = new THREE.SphereGeometry(500, 25, 25);
+  generateBasicMaterial(texture: THREE.Texture) {
+    this.geometry = new THREE.SphereGeometry(3000, 25, 25);
     this.material = new THREE.MeshBasicMaterial({
       map: texture,
       overdraw: 0.5,
