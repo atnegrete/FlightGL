@@ -14,26 +14,25 @@ import {
   PointsMaterial,
   Points,
 } from 'three';
-import { Environment } from './models/Environment';
-
-enum VIEW {
-  TOP_VIEW,
-  BOTTOM_VIEW,
-  RIGHT_VIEW,
-  LEFT_VIEW,
-  NORMAL_VIEW,
-}
-// flightGL conversion factors - start
-const DEGREE_TO_RADIANS = 0.0174533;
-// flightGL conversion factors - start
+import { Environment } from './Environment';
+import { Physics } from './Physics';
 
 // flightGl constants - start
-const DRAG = 0.8;
 const DISTANCE = -250;
 const DISTANCE_MULTIPLYIER = 100;
 // flightGl constants - end
 
 class App {
+  // flightGL game loop vars start
+  private lastFrameTimeMs: number = 0;
+  private maxFPS: number = 60;
+  private delta: number = 0;
+  private timestep: number = 1000 / 60;
+  private fps: number = 60;
+  private framesThisSecond: number = 0;
+  private lastFpsUpdate: number = 0;
+  // flightGL game loop vars end
+
   // flightGL related weights - start
   private readonly YAW_FACTOR = 0.005;
   private readonly PITCH_FACTOR = 0.01;
@@ -71,11 +70,13 @@ class App {
   // flightGL objects - start
   private tieFighter: Object3D;
   private readonly modelMaxRotation = 15.0 / 360.0;
-  private environment: Environment;
-  private view: VIEW = VIEW.NORMAL_VIEW;
+
   // flightGL objects - end
 
-  private velocity = -1;
+  // engines start
+  private environment: Environment;
+  private physics: Physics;
+  // engines end
 
   constructor() {
     this.controller = createController();
@@ -95,6 +96,7 @@ class App {
     this.scene.add(this.light);
 
     this.environment = new Environment(this.scene, this.camera, 1000, 6, 16000);
+    this.physics = new Physics();
 
     const loader = new ObjectLoader();
 
@@ -102,12 +104,11 @@ class App {
       'src/models/starwars-tie-fighter.json',
 
       obj => {
-        console.log({ obj });
         this.tieFighter = obj;
         this.tieFighter.scale.set(10, 10, 10);
         this.tieFighter.position.set(0, 0, DISTANCE);
         this.camera.add(this.tieFighter);
-        this.render();
+        this.loop();
       },
 
       xhr => {
@@ -123,7 +124,7 @@ class App {
   private generateStars() {
     var starsGeometry = new Geometry();
 
-    for (var i = 0; i < 5000000; i++) {
+    for (var i = 0; i < 500000; i++) {
       var star = new Vector3();
       star.x = THREEMATH.randFloatSpread(20000);
       star.y = THREEMATH.randFloatSpread(20000);
@@ -149,10 +150,30 @@ class App {
     this.tieFighter.position.z = DISTANCE + distance;
   }
 
-  private render() {
+  private update(delta: number): void {
     this.controller.update();
     this.environment.update();
 
+    const yaw = this.controller.getYaw();
+    const pitch = this.controller.getPitch();
+    const roll = this.controller.getRoll();
+    let thrust = 0;
+
+    if (!this.controller.isVariableThruster()) {
+      if (this.controller.isForwardPressed()) {
+        thrust = 10;
+      } else if (this.controller.isBackwardPressed()) {
+        thrust = -10;
+      }
+    } else {
+      thrust = this.controller.getThruster();
+      console.log(thrust);
+    }
+
+    this.physics.update(delta, thrust, roll, pitch, yaw);
+  }
+
+  private draw(inertia: number): void {
     this.renderer.render(this.scene, this.camera);
 
     this.adjustCanvasSize();
@@ -165,45 +186,54 @@ class App {
         this.camera.translateZ(-10);
       }
     } else {
-      const lightSpeed = this.controller.isForwardPressed() ? -500 : 0;
-      const thrust = this.controller.getThruster();
-      if (thrust == 0) this.velocity += DRAG;
-      else this.velocity += thrust;
-      this.velocity = Math.min(this.velocity, -1);
-      this.velocity = Math.max(this.velocity, -100);
-      this.camera.translateZ(this.velocity + lightSpeed);
+      this.camera.translateZ(this.physics.getVelocity())
     }
-    this.camera.rotateY(-this.controller.getYaw() * this.YAW_FACTOR);
-    this.camera.rotateX(this.controller.getPitch() * this.PITCH_FACTOR);
-    this.camera.rotateZ(-this.controller.getRoll() * this.ROLL_FACTOR);
 
-    const yaw = Math.min(
-      this.controller.getYaw() * this.YAW_FACTOR,
-      this.modelMaxRotation
-    );
-    const pitch = Math.min(
-      this.controller.getPitch() * this.PITCH_FACTOR,
-      this.modelMaxRotation
-    );
-    const roll = Math.min(
-      this.controller.getRoll() * this.ROLL_FACTOR,
-      this.modelMaxRotation
-    );
+    this.camera.rotateY(-this.physics.getYawRad());
+    this.camera.rotateX(this.physics.getPitchRad());
+    this.camera.rotateZ(-this.physics.getRollRad());
 
     this.tieFighter.setRotationFromAxisAngle(new Vector3(0, 1, 0), 0);
-    // this.warthog.rotateOnAxis(new Vector3(0, 0, 1), 0.35);
+    this.tieFighter.rotateOnAxis(new Vector3(0, 1, 0), this.physics.getYawOnAxis() * 15);
+    this.tieFighter.rotateOnAxis(new Vector3(1, 0, 0), this.physics.getPitchOnAxis() * 30);
+    this.tieFighter.rotateOnAxis(new Vector3(0, 0, 1), this.physics.getRollOnAxis() * 30);
+  }
 
-    this.tieFighter.rotateOnAxis(new Vector3(0, 1, 0), -(yaw * 30));
-    this.tieFighter.rotateOnAxis(new Vector3(1, 0, 0), pitch * 30);
-    this.tieFighter.rotateOnAxis(new Vector3(0, 0, 1), -roll * 30);
+  private loop(): void {
+    const timestamp = window.performance.now(); // get current timestamp
 
-    // this.warthog.rotateX(pitch);
-    // this.warthog.rotateZ(-roll);
+    if (timestamp < this.lastFrameTimeMs + 1000 / this.maxFPS) {
+      requestAnimationFrame(() => {
+        this.loop();
+      });
+      return;
+    }
+    this.delta += timestamp - this.lastFrameTimeMs;
+    this.lastFrameTimeMs = timestamp;
 
-    // this.warthog.rotateOnAxis(new Vector3(0, 0, 1), 0.35);
+    if (timestamp > this.lastFpsUpdate + 1000) {
+      this.fps = 0.25 * this.framesThisSecond + 0.75 * this.fps;
+
+      this.lastFpsUpdate = timestamp;
+      this.framesThisSecond = 0;
+    }
+
+    this.framesThisSecond++;
+
+    var numUpdateSteps = 0;
+    while (this.delta >= this.timestep) {
+      this.update(this.timestep / 1000);
+      this.delta -= this.timestep;
+      if (++numUpdateSteps >= 240) {
+        this.delta = 0;
+        break;
+      }
+    }
+
+    this.draw(this.delta / this.timestep);
 
     requestAnimationFrame(() => {
-      this.render();
+      this.loop();
     });
   }
 }

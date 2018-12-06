@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Asteroid } from './Asteroid';
-import { Planet } from './Planet';
+import { Asteroid } from './models/Asteroid';
+import { Planet } from './models/Planet';
 import { Texture } from 'three';
 import { generateKeyPair } from 'crypto';
 import { spawn } from 'child_process';
