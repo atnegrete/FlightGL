@@ -1,47 +1,73 @@
 import { Vector2, Vector3, Quaternion } from 'three';
+import { Engine } from './Engine';
 
 const DRAG = 0.8;
 const DEGREE_TO_RADIANS = 0.0174533;
 
-export class Physics {
+export class Physics implements Engine {
   private rotationVector: Vector3 = new Vector3(0, 0, 0);
   private onAxisRotation: Vector3 = new Vector3(0, 0, 0);
 
   private velocity = -1;
   private readonly modelMaxRotation = 15.0 / 360.0;
 
+  private _thrust: number;
+  public get thrust(): number {
+    return this._thrust;
+  }
+  public set thrust(value: number) {
+    this._thrust = value;
+  }
+  private _roll: number;
+  public get roll(): number {
+    return this._roll;
+  }
+  public set roll(value: number) {
+    this._roll = value;
+  }
+  private _pitch: number;
+  public get pitch(): number {
+    return this._pitch;
+  }
+  public set pitch(value: number) {
+    this._pitch = value;
+  }
+  private _yaw: number;
+  public get yaw(): number {
+    return this._yaw;
+  }
+  public set yaw(value: number) {
+    this._yaw = value;
+  }
+
   public update(
     dt: number,
-    thrust: number,
-    roll: number,
-    pitch: number,
-    yaw: number
   ): void {
-    this.updateRotationMatrix(roll, pitch, yaw);
-    this.updateVelocity(dt, thrust);
+    this.updateRotationMatrix();
+    this.updateVelocity(dt);
   }
 
   private clamp(val: number, lower: number, upper: number) {
     return Math.max(Math.min(val, upper), lower);
   }
 
-  private updateVelocity(delta: number, thrust: number): void {
-    if (thrust == 0) this.velocity += DRAG;
-    else this.velocity += thrust;
+  private updateVelocity(delta: number): void {
+    if (this.thrust == 0) this.velocity += DRAG;
+    else this.velocity += this.thrust;
 
     this.velocity = Math.min(this.velocity, -1);
     this.velocity = Math.max(this.velocity, -100);
   }
 
-  private updateRotationMatrix(roll: number, pitch: number, yaw: number) {
+  private updateRotationMatrix() {
     const rollQuaternion = new Quaternion();
-    rollQuaternion.setFromAxisAngle(new Vector3(0, 0, 1), roll);
+    rollQuaternion.setFromAxisAngle(new Vector3(0, 0, 1), this.roll);
 
     const pitchQuaternion = new Quaternion();
-    pitchQuaternion.setFromAxisAngle(new Vector3(1, 0, 0), pitch);
+    pitchQuaternion.setFromAxisAngle(new Vector3(1, 0, 0), this.pitch);
 
     const yawQuaternion = new Quaternion();
-    yawQuaternion.setFromAxisAngle(new Vector3(0, 1, 0), yaw);
+    yawQuaternion.setFromAxisAngle(new Vector3(0, 1, 0), this.yaw);
 
     const totalQuaternion = rollQuaternion
       .multiply(pitchQuaternion)
@@ -52,15 +78,15 @@ export class Physics {
     this.rotationVector.z = totalQuaternion.z;
 
     this.onAxisRotation.x = Math.min(
-      pitch * DEGREE_TO_RADIANS,
+      this.pitch * DEGREE_TO_RADIANS,
       this.modelMaxRotation
     );
     this.onAxisRotation.y = Math.min(
-      yaw * DEGREE_TO_RADIANS,
+      this.yaw * DEGREE_TO_RADIANS,
       this.modelMaxRotation
     );
     this.onAxisRotation.z = Math.min(
-      roll * DEGREE_TO_RADIANS,
+      this.roll * DEGREE_TO_RADIANS,
       this.modelMaxRotation
     );
   }

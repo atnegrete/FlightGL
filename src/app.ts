@@ -14,8 +14,8 @@ import {
   PointsMaterial,
   Points,
 } from 'three';
-import { Environment } from './Environment';
-import { Physics } from './Physics';
+import { Environment } from './engine/Environment';
+import { Physics } from './engine/Physics';
 
 // flightGl constants - start
 const DISTANCE = -250;
@@ -152,7 +152,7 @@ class App {
 
   private update(delta: number): void {
     this.controller.update();
-    this.environment.update();
+    this.environment.update(delta);
 
     const yaw = this.controller.getYaw();
     const pitch = this.controller.getPitch();
@@ -170,7 +170,11 @@ class App {
       console.log(thrust);
     }
 
-    this.physics.update(delta, thrust, roll, pitch, yaw);
+    this.physics.thrust = thrust;
+    this.physics.roll = roll;
+    this.physics.pitch = pitch;
+    this.physics.yaw = yaw;
+    this.physics.update(delta);
   }
 
   private draw(inertia: number): void {

@@ -1,11 +1,10 @@
 import * as THREE from 'three';
-import { Asteroid } from './models/Asteroid';
-import { Planet } from './models/Planet';
+import { Asteroid } from '../models/Asteroid';
+import { Planet } from '../models/Planet';
 import { Texture } from 'three';
-import { generateKeyPair } from 'crypto';
-import { spawn } from 'child_process';
+import { Engine } from './Engine';
 
-export class Environment {
+export class Environment implements Engine{
   public asteroids: Asteroid[][];
   public planets: Planet[];
   private radius: number;
@@ -90,7 +89,7 @@ export class Environment {
     }
   }
 
-  update(): void {
+  update(delta: number): void {
     this.updateObjects(this.asteroids[this.tick % 10], this.radius);
     this.updateObject(
       this.planets[this.tick % this.planetsCount],
