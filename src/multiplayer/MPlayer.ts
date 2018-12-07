@@ -53,37 +53,18 @@ export class MPlayer implements Engine {
       // this.room.listen('players/:position', (change: Colyseus.DataChange) => {
       //   console.log({ change });
       // });
-      this.room.listen('players/:id/:x', (change: Colyseus.DataChange) => {
+      this.room.listen('players/:id/:pos', (change: Colyseus.DataChange) => {
         if (self.room.sessionId != change.path.id) {
           console.log(self.room.sessionId, change.value);
           console.log({ change });
-          self.updateEnemeyPos(change.value, null, null);
-          let local = new Vector3(),
-            other = new Vector3();
-          this.tieFighter.getWorldPosition(local);
-          this.enemyTieFighter.getWorldPosition(other);
-          console.log(local, other);
-        }
-      });
+          if (change.path.pos == 'x') {
+            self.updateEnemeyPos(change.value, null, null);
+          } else if (change.path.pos == 'y') {
+            self.updateEnemeyPos(null, change.value, null);
+          } else if (change.path.pos == 'z') {
+            self.updateEnemeyPos(null, null, change.value);
+          }
 
-      this.room.listen('players/:id/:y', (change: Colyseus.DataChange) => {
-        if (self.room.sessionId != change.path.id) {
-          console.log(self.room.sessionId, change.value);
-          console.log({ change });
-          self.updateEnemeyPos(null, change.value, null);
-          let local = new Vector3(),
-            other = new Vector3();
-          this.tieFighter.getWorldPosition(local);
-          this.enemyTieFighter.getWorldPosition(other);
-          console.log(local, other);
-        }
-      });
-
-      this.room.listen('players/:id/:z', (change: Colyseus.DataChange) => {
-        if (self.room.sessionId != change.path.id) {
-          console.log(self.room.sessionId, change.value);
-          console.log({ change });
-          self.updateEnemeyPos(null, null, change.value);
           let local = new Vector3(),
             other = new Vector3();
           this.tieFighter.getWorldPosition(local);
