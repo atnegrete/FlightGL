@@ -56,29 +56,40 @@ export class MPlayer implements Engine {
       // this.room.listen('players/:position', (change: Colyseus.DataChange) => {
       //   console.log({ change });
       // });
+      this.room.listen(
+        'players/:id/:position/:x',
+        (change: Colyseus.DataChange) => {
+          console.log(self.room.sessionId, change.value);
+          console.log({ change });
+          if (self.room.sessionId != change.path.id)
+            self.updateEnemeyPos(change.value, null, null);
+        }
+      );
 
       this.room.listen(
         'players/:id/:position/:x',
         (change: Colyseus.DataChange) => {
-          console.log(self.room.id, change.value);
+          console.log(self.room.sessionId, change.value);
           console.log({ change });
-          self.updateEnemeyPos(change.value, null, null);
+          if (self.room.sessionId != change.path.id)
+            self.updateEnemeyPos(change.value, null, null);
         }
       );
 
       this.room.listen(
         'players/:id/:position/:y',
         (change: Colyseus.DataChange) => {
-          console.log(self.room.id, change.value);
+          console.log(self.room.sessionId, change.value);
           console.log({ change });
-          self.updateEnemeyPos(null, change.value, null);
+          if (self.room.sessionId != change.path.id)
+            self.updateEnemeyPos(null, change.value, null);
         }
       );
 
       this.room.listen(
         'players/:id/:position/:z',
         (change: Colyseus.DataChange) => {
-          console.log(self.room.id, change.value);
+          console.log(self.client.id, change.value);
           console.log({ change });
           self.updateEnemeyPos(null, null, change.value);
         }
@@ -97,9 +108,8 @@ export class MPlayer implements Engine {
   }
 
   private onRoomJoin(self: MPlayer) {
-    console.log(self.room.id);
     if (self.onRoomReadyCallback) self.onRoomReadyCallback();
-    console.log('joined');
+    console.log('joined', self.room.sessionId);
   }
 
   private onRoomLeave(self: MPlayer) {
