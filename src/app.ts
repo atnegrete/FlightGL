@@ -103,7 +103,7 @@ class App {
       return;
     }
 
-    this.camera.position.set(0, 0, -250);
+    this.camera.position.set(0, 0, 0);
     this.scene.add(this.camera);
 
     this.renderer.setSize(innerWidth, innerHeight);
@@ -134,7 +134,7 @@ class App {
 
         this.tieFighterP2 = obj.clone();
         this.tieFighterP2.scale.set(10, 10, 10);
-        this.tieFighterP2.position.set(0, 0, 1000);
+        this.tieFighterP2.position.set(0, 0, DISTANCE - 100);
         this.scene.add(this.tieFighterP2);
 
         // explosion audio loader

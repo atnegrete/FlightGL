@@ -54,51 +54,53 @@ export class MPlayer implements Engine {
       //   console.log({ change });
       // });
       this.room.listen(
-        'players/:id/:position/:x',
+        'players/:id/"position/:x',
         (change: Colyseus.DataChange) => {
-          console.log(self.room.sessionId, change.value);
-          console.log({ change });
-          if (self.room.sessionId != change.path.id)
+          if (self.room.sessionId != change.path.id) {
+            console.log(self.room.sessionId, change.value);
+            console.log({ change });
             self.updateEnemeyPos(change.value, null, null);
-
-          let local = new Vector3(),
-            other = new Vector3();
-          this.tieFighter.getWorldPosition(local);
-          this.enemyTieFighter.getWorldPosition(other);
-          console.log(local, other);
+            let local = new Vector3(),
+              other = new Vector3();
+            this.tieFighter.getWorldPosition(local);
+            this.enemyTieFighter.getWorldPosition(other);
+            console.log(local, other);
+          }
         }
       );
 
       this.room.listen(
         'players/:id/:position/:y',
         (change: Colyseus.DataChange) => {
-          console.log(self.room.sessionId, change.value);
-          console.log({ change });
-          if (self.room.sessionId != change.path.id)
+          if (self.room.sessionId != change.path.id) {
+            console.log(self.room.sessionId, change.value);
+            console.log({ change });
             self.updateEnemeyPos(null, change.value, null);
+            let local = new Vector3(),
+              other = new Vector3();
+            this.tieFighter.getWorldPosition(local);
+            this.enemyTieFighter.getWorldPosition(other);
+            console.log(local, other);
+          }
         }
       );
 
       this.room.listen(
         'players/:id/:position/:z',
         (change: Colyseus.DataChange) => {
-          console.log(self.room.sessionId, change.value);
-          console.log({ change });
-          if (self.room.sessionId != change.path.id)
+          if (self.room.sessionId != change.path.id) {
+            console.log(self.room.sessionId, change.value);
+            console.log({ change });
             self.updateEnemeyPos(null, null, change.value);
+            let local = new Vector3(),
+              other = new Vector3();
+            this.tieFighter.getWorldPosition(local);
+            this.enemyTieFighter.getWorldPosition(other);
+            console.log(local, other);
+          }
         }
       );
-
-      this.initiallyMoveTieFighter();
     });
-  }
-
-  private initiallyMoveTieFighter() {
-    if (this.isHost) {
-      this.tieFighter.position.set(0, 0, 0);
-    } else {
-      this.tieFighter.position.set(0, 0, -1000);
-    }
   }
 
   private onRoomJoin(self: MPlayer) {
@@ -112,6 +114,8 @@ export class MPlayer implements Engine {
   }
 
   private updateEnemeyPos(x?: number, y?: number, z?: number) {
+    this.enemyTieFighter.parent.updateMatrixWorld(false);
+    let position = new Vector3();
     if (x) this.enemyTieFighter.position.x = x;
     if (y) this.enemyTieFighter.position.y = y;
     if (z) this.enemyTieFighter.position.z = z;
