@@ -10,7 +10,6 @@ export class MPlayer implements Engine {
   private readonly ROOM_ID = 'state_handler';
   private tieFighter: Object3D;
   private enemyTieFighter: Object3D;
-  private enemyPos: Vector3;
   private onRoomReadyCallback: any;
 
   constructor(
@@ -21,8 +20,6 @@ export class MPlayer implements Engine {
     this.tieFighter = fighter;
     this.enemyTieFighter = enemyFighter;
     this.onRoomReadyCallback = onRoomReadyCallback;
-    this.enemyPos = new Vector3();
-    this.enemyTieFighter.getWorldPosition(this.enemyPos);
 
     this.client = new Colyseus.Client('ws://192.168.1.9:2567');
     this.createOrJoinRoom();
@@ -92,15 +89,6 @@ export class MPlayer implements Engine {
         }
       );
 
-      this.room.listen(
-        'players/:id/:position/:z',
-        (change: Colyseus.DataChange) => {
-          console.log(self.client.id, change.value);
-          console.log({ change });
-          self.updateEnemeyPos(null, null, change.value);
-        }
-      );
-
       this.initiallyMoveTieFighter();
     });
   }
@@ -124,9 +112,9 @@ export class MPlayer implements Engine {
   }
 
   private updateEnemeyPos(x?: number, y?: number, z?: number) {
-    if (x) this.enemyPos.x = x;
-    if (y) this.enemyPos.y = y;
-    if (z) this.enemyPos.z = z;
+    if (x) this.enemyTieFighter.position.x = x;
+    if (y) this.enemyTieFighter.position.y = y;
+    if (z) this.enemyTieFighter.position.z = z;
   }
 
   private onStateChange(self: MPlayer, data: any) {
@@ -176,11 +164,5 @@ export class MPlayer implements Engine {
     this.room.send({
       position,
     });
-
-    this.enemyTieFighter.position.set(
-      this.enemyPos.x,
-      this.enemyPos.y,
-      this.enemyPos.z
-    );
   }
 }
