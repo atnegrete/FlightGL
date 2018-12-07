@@ -39,13 +39,6 @@ class App {
   private lastFpsUpdate: number = 0;
   // flightGL game loop vars end
 
-  // flightGL related weights - start
-  private readonly YAW_FACTOR = 0.005;
-  private readonly PITCH_FACTOR = 0.01;
-  private readonly ROLL_FACTOR = 0.02;
-  private readonly THRUSTER_FACTOR = 50;
-  // flightGL related weights - end
-
   // flightGL colors - start
   private readonly BACKGROUND_COLOR: Color = new Color('rgb(0,0,0)');
   private readonly DIRECTIONAL_LIGHT_COLOR = 0xffffff;
@@ -124,9 +117,6 @@ class App {
         this.camera.add(this.hitBox);
         this.camera.add(this.tieFighter);
         this.loop();
-
-        // this.scene.add(this.tieFighter);
-        // this.testLoop();
       },
 
       xhr => {
@@ -137,16 +127,6 @@ class App {
         throw new Error('Error loading Warthog');
       }
     );
-  }
-
-  private testLoop(): void {
-    this.renderer.render(this.scene, this.camera);
-
-    this.adjustCanvasSize();
-
-    requestAnimationFrame(() => {
-      this.testLoop();
-    });
   }
 
   private generateStars() {
@@ -204,10 +184,6 @@ class App {
     this.physics.yaw = yaw;
     this.physics.update(delta);
 
-    // console.log(this.environment.getEnviromentMeshList()[0].position);
-    // let vec: Vector3 = new Vector3();
-    // this.hitBox.getWorldPosition(vec)
-    // console.log(vec);
     this.collision.setEnviromentMeshList(
       this.environment.getEnviromentMeshList()
     );
