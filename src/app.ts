@@ -14,10 +14,12 @@ import {
   PointsMaterial,
   Points,
   Mesh,
-  Material,
-  MeshPhongMaterial,
   CubeGeometry,
   MeshBasicMaterial,
+  AudioLoader,
+  AudioListener,
+  Audio,
+  AudioBuffer,
 } from 'three';
 import { Environment } from './engine/Environment';
 import { Physics } from './engine/Physics';
@@ -78,6 +80,10 @@ class App {
   private collision: Collision;
   // engines end
 
+  // sounds start
+  private listener = new AudioListener();
+  // sounds end
+
   private hitBox = new Mesh(
     new CubeGeometry(100, 100, 100, 1, 1, 1),
     new MeshBasicMaterial({ color: 0xff0000, wireframe: true })
@@ -102,7 +108,7 @@ class App {
 
     this.environment = new Environment(this.scene, this.camera, 1000, 6, 16000);
     this.physics = new Physics();
-    this.collision = new Collision();
+    this.collision = new Collision(this.listener);
 
     const loader = new ObjectLoader();
 
@@ -110,13 +116,33 @@ class App {
       'src/models/starwars-tie-fighter.json',
 
       obj => {
+        // tie fighter loading
         this.tieFighter = obj;
         this.tieFighter.scale.set(10, 10, 10);
         this.tieFighter.position.set(0, 0, DISTANCE);
-        this.hitBox.position.set(0,0,DISTANCE);
+        this.hitBox.position.set(0, 0, DISTANCE);
+
+        // add to camera
         this.camera.add(this.hitBox);
+        this.camera.add(this.listener);
         this.camera.add(this.tieFighter);
-        this.loop();
+
+        // explosion audio loader
+        const audioLoader = new AudioLoader();
+        audioLoader.load(
+          'src/sounds/explosion.ogg',
+          (buffer: AudioBuffer) => {
+            // create a global audio source
+            this.collision.setHitBuffer(buffer);
+            this.loop();
+          },
+          (xhr: any) => {
+            console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+          },
+          (err: any) => {
+            throw new Error('Error loading exploasion');
+          }
+        );
       },
 
       xhr => {
@@ -124,7 +150,7 @@ class App {
       },
 
       err => {
-        throw new Error('Error loading Warthog');
+        throw new Error('Error loading Tiefighter');
       }
     );
   }
