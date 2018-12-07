@@ -107,17 +107,15 @@ export class MPlayer implements Engine {
   }
 
   private updateEnemeyPos(x?: number, y?: number, z?: number) {
-    this.enemyTieFighter.parent.updateMatrixWorld(false);
     if (x) this.enemyTieFighter.position.x = x;
     if (y) this.enemyTieFighter.position.y = y;
     if (z) this.enemyTieFighter.position.z = z;
   }
 
   private updateEnemeyRot(x?: number, y?: number, z?: number) {
-    this.enemyTieFighter.parent.updateMatrixWorld(false);
-    // if (x) this.enemyTieFighter.position.x = x;
-    // if (y) this.enemyTieFighter.position.y = y;
-    // if (z) this.enemyTieFighter.position.z = z;
+    this.enemyTieFighter.rotation.x = x;
+    this.enemyTieFighter.rotation.y = y;
+    this.enemyTieFighter.rotation.z = z;
   }
 
   private onStateChange(self: MPlayer, data: any) {
