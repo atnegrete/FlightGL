@@ -48,36 +48,51 @@ export class MPlayer implements Engine {
         this.onRoomLeave(self);
       });
 
-      this.room.listen('players/:id/:attr', (change: Colyseus.DataChange) => {
-        if (self.room.sessionId != change.path.id) {
-          console.log(self.room.sessionId, change.value);
-          console.log({ change });
-          if (change.path.attr == 'position') {
-            self.updateEnemeyPos(
-              change.value.x,
-              change.value.y,
-              change.value.z
-            );
-          }
-          // else if (change.path.attr == 'y') {
-          //   self.updateEnemeyPos(null, change.value, null);
-          // } else if (change.path.attr == 'z') {
-          //   self.updateEnemeyPos(null, null, change.value);
-          // } else if (change.path.attr == 'rx') {
-          //   self.updateEnemeyPos(change.value, null, null);
-          // } else if (change.path.attr == 'ry') {
-          //   self.updateEnemeyPos(null, change.value, null);
-          // } else if (change.path.attr == 'rz') {
-          //   self.updateEnemeyPos(null, null, change.value);
-          // }
+      this.room.listen(
+        'players/:id/:position/:attr',
+        (change: Colyseus.DataChange) => {
+          if (self.room.sessionId != change.path.id) {
+            console.log(self.room.sessionId, change.value);
+            console.log({ change });
+            if (change.path.attr == 'x') {
+              self.updateEnemeyPos(change.value.x, null, null);
+            } else if (change.path.attr == 'y') {
+              self.updateEnemeyPos(null, change.value, null);
+            } else if (change.path.attr == 'z') {
+              self.updateEnemeyPos(null, null, change.value);
+            }
 
-          let local = new Vector3(),
-            other = new Vector3();
-          this.tieFighter.getWorldPosition(local);
-          this.enemyTieFighter.getWorldPosition(other);
-          console.log(local, other);
+            let local = new Vector3(),
+              other = new Vector3();
+            this.tieFighter.getWorldPosition(local);
+            this.enemyTieFighter.getWorldPosition(other);
+            console.log(local, other);
+          }
         }
-      });
+      );
+
+      this.room.listen(
+        'players/:id/:rotation/:attr',
+        (change: Colyseus.DataChange) => {
+          if (self.room.sessionId != change.path.id) {
+            console.log(self.room.sessionId, change.value);
+            console.log({ change });
+            if (change.path.attr == 'rx') {
+              self.updateEnemeyRot(change.value, null, null);
+            } else if (change.path.attr == 'ry') {
+              self.updateEnemeyRot(null, change.value, null);
+            } else if (change.path.attr == 'rz') {
+              self.updateEnemeyRot(null, null, change.value);
+            }
+
+            let local = new Vector3(),
+              other = new Vector3();
+            this.tieFighter.getWorldPosition(local);
+            this.enemyTieFighter.getWorldPosition(other);
+            console.log(local, other);
+          }
+        }
+      );
     });
   }
 
@@ -100,9 +115,9 @@ export class MPlayer implements Engine {
 
   private updateEnemeyRot(x?: number, y?: number, z?: number) {
     this.enemyTieFighter.parent.updateMatrixWorld(false);
-    if (x) this.enemyTieFighter.position.x = x;
-    if (y) this.enemyTieFighter.position.y = y;
-    if (z) this.enemyTieFighter.position.z = z;
+    // if (x) this.enemyTieFighter.position.x = x;
+    // if (y) this.enemyTieFighter.position.y = y;
+    // if (z) this.enemyTieFighter.position.z = z;
   }
 
   private onStateChange(self: MPlayer, data: any) {
@@ -153,13 +168,13 @@ export class MPlayer implements Engine {
       position,
     });
 
-    // let rotation = new Vector3();
-    // rotation.x = this.tieFighter.rotation.x;
-    // rotation.y = this.tieFighter.rotation.y;
-    // rotation.z = this.tieFighter.rotation.z;
+    let rotation = new Vector3();
+    rotation.x = this.tieFighter.rotation.x;
+    rotation.y = this.tieFighter.rotation.y;
+    rotation.z = this.tieFighter.rotation.z;
 
-    // this.room.send({
-    //   rotation,
-    // });
+    this.room.send({
+      rotation,
+    });
   }
 }
