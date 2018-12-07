@@ -1,4 +1,4 @@
-import { Mesh, Object3D, MeshPhongMaterial, Geometry, Raycaster } from 'three';
+import { Mesh, Object3D, MeshPhongMaterial, Geometry, Raycaster, Vector3 } from 'three';
 import { Engine } from './Engine';
 
 export class Collision implements Engine {
@@ -19,29 +19,24 @@ export class Collision implements Engine {
   }
 
   update(delta: number): void {
-    // if (this.collisionDetectionTimer < this.collisionDetectionThreshhold) {
-    //   this.collisionDetectionTimer += delta;
-    //   return;
-    // }
+    let position = new Vector3();
+    this.mesh.getWorldPosition(position);
 
-    const meshPosition = this.mesh.position.clone();
     const meshGeometry = <Geometry> this.mesh.geometry;
 
     for (let i = 0; i < meshGeometry.vertices.length; i++) {
       const vertexLocal = meshGeometry.vertices[i].clone();
-      const vertexGlobal = vertexLocal.applyMatrix4(this.mesh.matrix);
-      const directionVector = vertexGlobal.sub(this.mesh.position);
+      const vertexGlobal = vertexLocal.applyMatrix4(this.mesh.matrixWorld);
+      const directionVector = vertexGlobal.sub(position);
 
       const ray = new Raycaster(
-        meshPosition,
+        position,
         directionVector.clone().normalize()
       );
       const collision = ray.intersectObjects(this.enviromentMeshList);
-      if (collision.length > 0 && collision[0].distance < directionVector.length()) {
-        console.log("hit");
+      if (collision.length > 0 && collision[0].distance < 1000) {
+        console.log("HIT");
       }
-
-      this.collisionDetectionTimer = 0;
     }
   }
 }

@@ -107,7 +107,7 @@ class App {
     this.light.position.set(0, 1, 1).normalize();
     this.scene.add(this.light);
 
-    this.environment = new Environment(this.scene, this.camera, 1000, 1, 16000);
+    this.environment = new Environment(this.scene, this.camera, 1000, 6, 16000);
     this.physics = new Physics();
     this.collision = new Collision();
 
@@ -124,7 +124,9 @@ class App {
         this.camera.add(this.hitBox);
         this.camera.add(this.tieFighter);
         this.loop();
-        // this.testLoop(obj);
+
+        // this.scene.add(this.tieFighter);
+        // this.testLoop();
       },
 
       xhr => {
@@ -137,17 +139,13 @@ class App {
     );
   }
 
-  private testLoop(obj: Object3D): void {
-    const R_WNG: Mesh = <Mesh>obj.children[0];
-    const R_WNG_MAT = <MeshPhongMaterial>R_WNG.material;
-    R_WNG_MAT.setValues({ color: 0xff0000 });
-
-    console.log(R_WNG);
-    this.tieFighter.rotateOnAxis(new Vector3(0, 1, 0), 0.05);
+  private testLoop(): void {
     this.renderer.render(this.scene, this.camera);
 
+    this.adjustCanvasSize();
+
     requestAnimationFrame(() => {
-      this.testLoop(obj);
+      this.testLoop();
     });
   }
 
@@ -206,13 +204,15 @@ class App {
     this.physics.yaw = yaw;
     this.physics.update(delta);
 
-    console.log(this.environment.getEnviromentMeshList()[0].position);
-    console.log(this.hitBox.position);
-    // this.collision.setEnviromentMeshList(
-    //   this.environment.getEnviromentMeshList()
-    // );
-    // this.collision.setMesh(this.hitBox);
-    // this.collision.update(delta);
+    // console.log(this.environment.getEnviromentMeshList()[0].position);
+    // let vec: Vector3 = new Vector3();
+    // this.hitBox.getWorldPosition(vec)
+    // console.log(vec);
+    this.collision.setEnviromentMeshList(
+      this.environment.getEnviromentMeshList()
+    );
+    this.collision.setMesh(this.hitBox);
+    this.collision.update(delta);
   }
 
   private draw(inertia: number): void {

@@ -68,6 +68,7 @@ export class Environment implements Engine{
           this.getRandomNumber(this.radius)
         );
         this.asteroids[i][j] = asteroid;
+        this.enviromentMeshList.push(asteroid);
         this.scene.add(this.asteroids[i][j]);
       }
     }
@@ -92,12 +93,12 @@ export class Environment implements Engine{
   }
 
   update(delta: number): void {
-    // this.updateObjects(this.asteroids[this.tick % 10], this.radius);
-    // this.updateObject(
-    //   this.planets[this.tick % this.planetsCount],
-    //   this.radius * this.planetsRadiusMultiplier
-    // );
-    // this.tick++;
+    this.updateObjects(this.asteroids[this.tick % 10], this.radius);
+    this.updateObject(
+      this.planets[this.tick % this.planetsCount],
+      this.radius * this.planetsRadiusMultiplier
+    );
+    this.tick++;
   }
 
   updateObjects(objects: any[], spawnDistance: number) {
