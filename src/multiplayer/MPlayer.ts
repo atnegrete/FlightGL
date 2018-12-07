@@ -63,16 +63,12 @@ export class MPlayer implements Engine {
           console.log({ change });
           if (self.room.sessionId != change.path.id)
             self.updateEnemeyPos(change.value, null, null);
-        }
-      );
 
-      this.room.listen(
-        'players/:id/:position/:x',
-        (change: Colyseus.DataChange) => {
-          console.log(self.room.sessionId, change.value);
-          console.log({ change });
-          if (self.room.sessionId != change.path.id)
-            self.updateEnemeyPos(change.value, null, null);
+          let local = new Vector3(),
+            other = new Vector3();
+          this.tieFighter.getWorldPosition(local);
+          this.enemyTieFighter.getWorldPosition(other);
+          console.log(local, other);
         }
       );
 
@@ -83,6 +79,16 @@ export class MPlayer implements Engine {
           console.log({ change });
           if (self.room.sessionId != change.path.id)
             self.updateEnemeyPos(null, change.value, null);
+        }
+      );
+
+      this.room.listen(
+        'players/:id/:position/:z',
+        (change: Colyseus.DataChange) => {
+          console.log(self.room.sessionId, change.value);
+          console.log({ change });
+          if (self.room.sessionId != change.path.id)
+            self.updateEnemeyPos(null, null, change.value);
         }
       );
 
