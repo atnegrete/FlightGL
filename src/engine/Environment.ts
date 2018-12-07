@@ -1,24 +1,36 @@
-import * as THREE from 'three';
+import {
+  Math as THREEMATH,
+  Vector3,
+  Scene,
+  PerspectiveCamera,
+  Texture,
+  Mesh,
+  TextureLoader,
+  PointsMaterial,
+  Frustum,
+  Matrix4,
+  Geometry,
+  Points,
+} from 'three';
 import { Asteroid } from '../models/Asteroid';
 import { Planet } from '../models/Planet';
-import { Texture, Mesh } from 'three';
 import { Engine } from './Engine';
 
 export class Environment implements Engine {
   public asteroids: Asteroid[];
+  public starClusters: Points[];
   public planets: Planet[];
   private radius: number;
   private asteroidsCount: number;
   private planetsCount: number;
-  private scene: THREE.Scene;
+  private scene: Scene;
   private textures: Texture[];
-  private pCamera: THREE.PerspectiveCamera;
-  private readonly divisor = 20;
+  private pCamera: PerspectiveCamera;
   private readonly planetsRadiusMultiplier = 3.5;
 
   constructor(
-    scene: THREE.Scene,
-    player: THREE.PerspectiveCamera,
+    scene: Scene,
+    player: PerspectiveCamera,
     asteroids: number,
     planets: number,
     radius: number
@@ -29,12 +41,14 @@ export class Environment implements Engine {
     this.asteroidsCount = asteroids;
     this.planetsCount = planets;
 
+    this.starClusters = [];
     this.textures = [];
+    this.generateStars();
     this.loadTextures();
   }
 
   loadTextures(): void {
-    let loader = new THREE.TextureLoader();
+    let loader = new TextureLoader();
     let promises: any[] = [];
     let texturePaths: any[] = [
       'src/textures/earth.png',
@@ -68,28 +82,24 @@ export class Environment implements Engine {
 
     let self = this;
     Promise.all(promises).then(function(textures) {
-      // sanity check as an array:
       for (var i = 0; i < textures.length; i++) {
         self.textures.push(textures[i]);
       }
-      console.log({ textures });
       self.initAsteroids();
       self.initPlanets();
     });
   }
 
-  initAsteroids(): void {
+  private initAsteroids(): void {
     this.asteroids = [];
     for (let i = 0; i < this.asteroidsCount; i++) {
       const textureIndex = Environment.randomIntFromInterval(5, 8);
-      console.log({ textureIndex });
       let asteroid = new Asteroid(this.textures[textureIndex]);
-      console.log(this.textures[textureIndex]);
       asteroid.geometry.scale(1, 1, 1);
       asteroid.position.set(
-        this.getRandomNumber(this.radius),
-        this.getRandomNumber(this.radius),
-        this.getRandomNumber(this.radius)
+        this.getRandomPosNegNumber(this.radius),
+        this.getRandomPosNegNumber(this.radius),
+        this.getRandomPosNegNumber(this.radius)
       );
       this.asteroids[i] = asteroid;
       this.scene.add(asteroid);
@@ -100,7 +110,7 @@ export class Environment implements Engine {
     );
   }
 
-  initPlanets(): any {
+  private initPlanets(): any {
     this.planets = [];
     for (let i = 0; i < this.planetsCount; ++i) {
       let planet = new Planet(
@@ -108,32 +118,53 @@ export class Environment implements Engine {
       );
       planet.geometry.scale(1, 1, 1);
       planet.position.set(
-        this.getRandomNumber(this.radius * this.planetsRadiusMultiplier),
-        this.getRandomNumber(this.radius * this.planetsRadiusMultiplier),
-        this.getRandomNumber(this.radius * this.planetsRadiusMultiplier)
+        this.getRandomPosNegNumber(this.radius * this.planetsRadiusMultiplier),
+        this.getRandomPosNegNumber(this.radius * this.planetsRadiusMultiplier),
+        this.getRandomPosNegNumber(this.radius * this.planetsRadiusMultiplier)
       );
       this.planets.push(planet);
       this.scene.add(this.planets[i]);
     }
   }
 
-  update(delta: number): void {
-    this.updateObjects(5);
+  private generateStars() {
+    var starsGeometry = new Geometry();
+    for (let c = 0; c < 20; c++) {
+      for (var i = 0; i < 500; i++) {
+        var star = new Vector3();
+        star.x = THREEMATH.randFloatSpread(40000);
+        star.y = THREEMATH.randFloatSpread(40000);
+        star.z = THREEMATH.randFloatSpread(40000);
+        starsGeometry.vertices.push(star);
+      }
+      var starsMaterial = new PointsMaterial({ color: 0x888888 });
+      var starField = new Points(starsGeometry, starsMaterial);
+      starField.position.x = this.getRandomPosNegNumber(this.radius);
+      starField.position.y = this.getRandomPosNegNumber(this.radius);
+      starField.position.z = this.getRandomPosNegNumber(this.radius);
+      this.starClusters[c] = starField;
+      this.scene.add(this.starClusters[c]);
+    }
   }
 
-  updateObjects(count: number) {
+  public update(delta: number): void {
+    this.checkAndUpdateAsteroids(5);
+    this.checkAndUpdateStarClusters(5);
+  }
+
+  private checkAndUpdateAsteroids(count: number) {
     for (let i = 0; i < count; i++) {
       let obj = this.asteroids.pop();
       if (obj && obj.position) {
         let distance = obj.position.distanceTo(this.pCamera.position);
-        const updatedObj = this.updateObject(obj);
+        const updatedObj = this.updateInstanceIfFar(obj);
 
         if (updatedObj) {
           this.asteroids.push(updatedObj);
           const updatedDistance = updatedObj.position.distanceTo(
             this.pCamera.position
           );
-          console.log({ updatedObj, distance, updatedDistance });
+          // console.log({ updatedObj, distance, updatedDistance });
         } else {
           this.asteroids.push(obj);
         }
@@ -142,11 +173,26 @@ export class Environment implements Engine {
     this.asteroidSort();
   }
 
-  updateObject(obj: any): any {
+  private checkAndUpdateStarClusters(count: number) {
+    for (let i = 0; i < count; i++) {
+      let obj = this.starClusters.pop();
+      if (obj && obj.position) {
+        const updatedObj = this.updateInstanceIfFar(obj);
+        if (updatedObj) {
+          this.starClusters.push(updatedObj);
+        } else {
+          this.starClusters.push(obj);
+        }
+      }
+    }
+    this.starClusterSort();
+  }
+
+  private updateInstanceIfFar(obj: any): any {
     let distance = obj.position.distanceTo(this.pCamera.position);
     if (distance > this.radius) {
-      let frustum = new THREE.Frustum();
-      let cameraViewProjectionMatrix = new THREE.Matrix4();
+      let frustum = new Frustum();
+      let cameraViewProjectionMatrix = new Matrix4();
       this.pCamera.matrixWorldInverse.getInverse(this.pCamera.matrixWorld);
       cameraViewProjectionMatrix.multiplyMatrices(
         this.pCamera.projectionMatrix,
@@ -167,9 +213,9 @@ export class Environment implements Engine {
 
   private geratePosition() {
     let updatedZ = this.radius * 0.8;
-    let updatedPos = new THREE.Vector3(
-      this.getRandomNumber(this.radius * 0.75),
-      this.getRandomNumber(this.radius * 0.75),
+    let updatedPos = new Vector3(
+      this.getRandomPosNegNumber(this.radius * 0.75),
+      this.getRandomPosNegNumber(this.radius * 0.75),
       this.pCamera.position.z >= 0 ? updatedZ : -updatedZ
     );
     this.pCamera.matrixWorldInverse.getInverse(this.pCamera.matrixWorld);
@@ -177,13 +223,21 @@ export class Environment implements Engine {
     return updatedPos;
   }
 
-  private getRandomNumber(max: number) {
+  private getRandomPosNegNumber(max: number) {
     let num = Environment.randomIntFromInterval(0, max);
     return Math.random() > 0.5 ? num : -num;
   }
 
   private asteroidSort() {
     this.asteroids.sort((a: any, b: any) => {
+      const distanceA = this.pCamera.position.distanceTo(a.position);
+      const distanceB = this.pCamera.position.distanceTo(b.position);
+      return distanceA - distanceB;
+    });
+  }
+
+  private starClusterSort() {
+    this.starClusters.sort((a: any, b: any) => {
       const distanceA = this.pCamera.position.distanceTo(a.position);
       const distanceB = this.pCamera.position.distanceTo(b.position);
       return distanceA - distanceB;
