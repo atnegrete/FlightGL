@@ -47,23 +47,29 @@ export class MPlayer implements Engine {
       this.room.onLeave.add(() => {
         this.onRoomLeave(self);
       });
-      // this.room.onStateChange.add((data: any) => {
-      //   this.onStateChange(self, data);
-      // });
-      // this.room.listen('players/:position', (change: Colyseus.DataChange) => {
-      //   console.log({ change });
-      // });
-      this.room.listen('players/:id/:pos', (change: Colyseus.DataChange) => {
+
+      this.room.listen('players/:id/:attr', (change: Colyseus.DataChange) => {
         if (self.room.sessionId != change.path.id) {
           console.log(self.room.sessionId, change.value);
           console.log({ change });
-          if (change.path.pos == 'x') {
-            self.updateEnemeyPos(change.value, null, null);
-          } else if (change.path.pos == 'y') {
-            self.updateEnemeyPos(null, change.value, null);
-          } else if (change.path.pos == 'z') {
-            self.updateEnemeyPos(null, null, change.value);
+          if (change.path.attr == 'position') {
+            self.updateEnemeyPos(
+              change.value.x,
+              change.value.y,
+              change.value.z
+            );
           }
+          // else if (change.path.attr == 'y') {
+          //   self.updateEnemeyPos(null, change.value, null);
+          // } else if (change.path.attr == 'z') {
+          //   self.updateEnemeyPos(null, null, change.value);
+          // } else if (change.path.attr == 'rx') {
+          //   self.updateEnemeyPos(change.value, null, null);
+          // } else if (change.path.attr == 'ry') {
+          //   self.updateEnemeyPos(null, change.value, null);
+          // } else if (change.path.attr == 'rz') {
+          //   self.updateEnemeyPos(null, null, change.value);
+          // }
 
           let local = new Vector3(),
             other = new Vector3();
@@ -87,7 +93,13 @@ export class MPlayer implements Engine {
 
   private updateEnemeyPos(x?: number, y?: number, z?: number) {
     this.enemyTieFighter.parent.updateMatrixWorld(false);
-    let position = new Vector3();
+    if (x) this.enemyTieFighter.position.x = x;
+    if (y) this.enemyTieFighter.position.y = y;
+    if (z) this.enemyTieFighter.position.z = z;
+  }
+
+  private updateEnemeyRot(x?: number, y?: number, z?: number) {
+    this.enemyTieFighter.parent.updateMatrixWorld(false);
     if (x) this.enemyTieFighter.position.x = x;
     if (y) this.enemyTieFighter.position.y = y;
     if (z) this.enemyTieFighter.position.z = z;
@@ -140,5 +152,14 @@ export class MPlayer implements Engine {
     this.room.send({
       position,
     });
+
+    // let rotation = new Vector3();
+    // rotation.x = this.tieFighter.rotation.x;
+    // rotation.y = this.tieFighter.rotation.y;
+    // rotation.z = this.tieFighter.rotation.z;
+
+    // this.room.send({
+    //   rotation,
+    // });
   }
 }
