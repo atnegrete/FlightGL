@@ -2,20 +2,16 @@ import * as THREE from 'three';
 import { Asteroid } from './models/Asteroid';
 import { Planet } from './models/Planet';
 import { Texture } from 'three';
-import { generateKeyPair } from 'crypto';
-import { spawn } from 'child_process';
 
 export class Environment {
-  public asteroids: Asteroid[][];
+  public asteroids: Asteroid[];
   public planets: Planet[];
   private radius: number;
   private asteroidsCount: number;
   private planetsCount: number;
   private scene: THREE.Scene;
-  private planetTextures: Texture[];
-  private asteroidTextures: Texture[];
-  private player: THREE.PerspectiveCamera;
-  private tick: number;
+  private textures: Texture[];
+  private pCamera: THREE.PerspectiveCamera;
   private readonly divisor = 20;
   private readonly planetsRadiusMultiplier = 3.5;
 
@@ -27,57 +23,87 @@ export class Environment {
     radius: number
   ) {
     this.scene = scene;
-    this.player = player;
+    this.pCamera = player;
     this.radius = radius;
     this.asteroidsCount = asteroids;
     this.planetsCount = planets;
-    this.tick = 0;
 
-    this.planetTextures = [];
-    this.asteroidTextures = [];
+    this.textures = [];
     this.loadTextures();
-    this.initPlanets();
-    this.initAsteroids();
   }
 
-  loadTextures() {
-    var loader = new THREE.TextureLoader();
-    this.planetTextures.push(loader.load('src/textures/earth.png'));
-    this.planetTextures.push(loader.load('src/textures/jupiter.JPG'));
-    this.planetTextures.push(loader.load('src/textures/mars.jpg'));
-    this.planetTextures.push(loader.load('src/textures/venus.jpg'));
-    this.planetTextures.push(loader.load('src/textures/mercury.jpg'));
-    this.asteroidTextures.push(loader.load('src/textures/asteroid1.jpg'));
-    this.asteroidTextures.push(loader.load('src/textures/asteroid2.png'));
-    this.asteroidTextures.push(loader.load('src/textures/asteroid3.jpg'));
-    this.asteroidTextures.push(loader.load('src/textures/asteroid4.jpg'));
-  }
+  loadTextures(): void {
+    let loader = new THREE.TextureLoader();
+    let promises: any[] = [];
+    let texturePaths: any[] = [
+      'src/textures/earth.png',
+      'src/textures/jupiter.JPG',
+      'src/textures/mars.jpg',
+      'src/textures/venus.jpg',
+      'src/textures/mercury.jpg',
+      'src/textures/asteroid1.jpg',
+      'src/textures/asteroid2.png',
+      'src/textures/asteroid3.jpg',
+      'src/textures/asteroid4.jpg',
+    ];
+    texturePaths.forEach(texturePath => {
+      promises.push(
+        new Promise((resolve, reject) => {
+          loader.load(
+            texturePath,
+            texture => {
+              resolve(texture);
+            },
+            xhr => {
+              console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+            },
+            err => {
+              console.log(`Error loading ${texturePath}`);
+            }
+          );
+        })
+      );
+    });
 
-  initAsteroids(): any {
-    this.asteroids = [];
-    for (let i = 0; i < this.divisor; ++i) {
-      this.asteroids[i] = [];
-      for (let j = 0; j < this.asteroidsCount / this.divisor; ++j) {
-        let asteroid = new Asteroid(
-          this.asteroidTextures[Environment.randomIntFromInterval(0, 3)]
-        );
-        asteroid.geometry.scale(1, 1, 1);
-        asteroid.position.set(
-          this.getRandomNumber(this.radius),
-          this.getRandomNumber(this.radius),
-          this.getRandomNumber(this.radius)
-        );
-        this.asteroids[i][j] = asteroid;
-        this.scene.add(this.asteroids[i][j]);
+    let self = this;
+    Promise.all(promises).then(function(textures) {
+      // sanity check as an array:
+      for (var i = 0; i < textures.length; i++) {
+        self.textures.push(textures[i]);
       }
+      console.log({ textures });
+      self.initAsteroids();
+      self.initPlanets();
+    });
+  }
+
+  initAsteroids(): void {
+    this.asteroids = [];
+    for (let i = 0; i < this.asteroidsCount; i++) {
+      const textureIndex = Environment.randomIntFromInterval(5, 8);
+      console.log({ textureIndex });
+      let asteroid = new Asteroid(this.textures[textureIndex]);
+      console.log(this.textures[textureIndex]);
+      asteroid.geometry.scale(1, 1, 1);
+      asteroid.position.set(
+        this.getRandomNumber(this.radius),
+        this.getRandomNumber(this.radius),
+        this.getRandomNumber(this.radius)
+      );
+      this.asteroids[i] = asteroid;
+      this.scene.add(asteroid);
     }
+
+    console.log(
+      `ASTEROID COUNT: ${this.asteroids.length}   ${this.asteroidsCount}`
+    );
   }
 
   initPlanets(): any {
     this.planets = [];
     for (let i = 0; i < this.planetsCount; ++i) {
       let planet = new Planet(
-        this.planetTextures[Environment.randomIntFromInterval(0, 4)]
+        this.textures[Environment.randomIntFromInterval(0, 4)]
       );
       planet.geometry.scale(1, 1, 1);
       planet.position.set(
@@ -91,50 +117,76 @@ export class Environment {
   }
 
   update(): void {
-    this.updateObjects(this.asteroids[this.tick % 10], this.radius);
-    this.updateObject(
-      this.planets[this.tick % this.planetsCount],
-      this.radius * this.planetsRadiusMultiplier
-    );
-    this.tick++;
+    this.updateObjects(5);
   }
 
-  updateObjects(objects: any[], spawnDistance: number) {
-    objects.forEach(obj => {
-      this.updateObject(obj, spawnDistance);
-    });
-  }
+  updateObjects(count: number) {
+    for (let i = 0; i < count; i++) {
+      let obj = this.asteroids.pop();
+      if (obj && obj.position) {
+        let distance = obj.position.distanceTo(this.pCamera.position);
+        const updatedObj = this.updateObject(obj);
 
-  updateObject(obj: any, spawnDistance: number) {
-    if (obj && obj.position) {
-      let distance = obj.position.distanceTo(this.player.position);
-      if (distance > spawnDistance * 0.55) {
-        let frustum = new THREE.Frustum();
-        let cameraViewProjectionMatrix = new THREE.Matrix4();
-        this.player.matrixWorldInverse.getInverse(this.player.matrixWorld);
-        cameraViewProjectionMatrix.multiplyMatrices(
-          this.player.projectionMatrix,
-          this.player.matrixWorldInverse
-        );
-        frustum.setFromMatrix(cameraViewProjectionMatrix);
-
-        if (!frustum.intersectsObject(obj)) {
-          const updatedPos = this.geratePosition(spawnDistance);
-          obj.position.set(updatedPos.x, updatedPos.y, updatedPos.z);
+        if (updatedObj) {
+          this.asteroids.push(updatedObj);
+          const updatedDistance = updatedObj.position.distanceTo(
+            this.pCamera.position
+          );
+          console.log({ updatedObj, distance, updatedDistance });
+        } else {
+          this.asteroids.push(obj);
         }
       }
     }
+    this.asteroidSort();
   }
-  private geratePosition(distance: number) {
-    const x = this.player.position.x + this.getRandomNumber(distance);
-    const y = this.player.position.y + this.getRandomNumber(distance);
-    const z = this.player.position.z + this.getRandomNumber(distance);
-    return new THREE.Vector3(x, y, z);
+
+  updateObject(obj: any): any {
+    let distance = obj.position.distanceTo(this.pCamera.position);
+    if (distance > this.radius) {
+      let frustum = new THREE.Frustum();
+      let cameraViewProjectionMatrix = new THREE.Matrix4();
+      this.pCamera.matrixWorldInverse.getInverse(this.pCamera.matrixWorld);
+      cameraViewProjectionMatrix.multiplyMatrices(
+        this.pCamera.projectionMatrix,
+        this.pCamera.matrixWorldInverse
+      );
+      frustum.setFromMatrix(cameraViewProjectionMatrix);
+
+      if (!frustum.intersectsObject(obj)) {
+        const updatedPos = this.geratePosition();
+        obj.position.set(updatedPos.x, updatedPos.y, updatedPos.z);
+        return obj;
+      }
+      return null;
+    } else {
+      return null;
+    }
+  }
+
+  private geratePosition() {
+    let updatedZ = this.radius * 0.8;
+    let updatedPos = new THREE.Vector3(
+      this.getRandomNumber(this.radius * 0.75),
+      this.getRandomNumber(this.radius * 0.75),
+      this.pCamera.position.z >= 0 ? updatedZ : -updatedZ
+    );
+    this.pCamera.matrixWorldInverse.getInverse(this.pCamera.matrixWorld);
+    updatedPos.applyMatrix4(this.pCamera.matrixWorld);
+    return updatedPos;
   }
 
   private getRandomNumber(max: number) {
-    let num = Math.random() * max;
+    let num = Environment.randomIntFromInterval(0, max);
     return Math.random() > 0.5 ? num : -num;
+  }
+
+  private asteroidSort() {
+    this.asteroids.sort((a: any, b: any) => {
+      const distanceA = this.pCamera.position.distanceTo(a.position);
+      const distanceB = this.pCamera.position.distanceTo(b.position);
+      return distanceA - distanceB;
+    });
   }
 
   static randomIntFromInterval(min: number, max: number) {

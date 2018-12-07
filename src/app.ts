@@ -170,7 +170,7 @@ class App {
       console.log(thrust);
     }
 
-    this.physics.update(delta, thrust, roll, pitch, yaw);
+    this.physics.update(delta, 10, roll, pitch, yaw);
   }
 
   private draw(inertia: number): void {
@@ -186,7 +186,7 @@ class App {
         this.camera.translateZ(-10);
       }
     } else {
-      this.camera.translateZ(this.physics.getVelocity())
+      this.camera.translateZ(this.physics.getVelocity());
     }
 
     this.camera.rotateY(-this.physics.getYawRad());
@@ -194,9 +194,18 @@ class App {
     this.camera.rotateZ(-this.physics.getRollRad());
 
     this.tieFighter.setRotationFromAxisAngle(new Vector3(0, 1, 0), 0);
-    this.tieFighter.rotateOnAxis(new Vector3(0, 1, 0), this.physics.getYawOnAxis() * 15);
-    this.tieFighter.rotateOnAxis(new Vector3(1, 0, 0), this.physics.getPitchOnAxis() * 30);
-    this.tieFighter.rotateOnAxis(new Vector3(0, 0, 1), this.physics.getRollOnAxis() * 30);
+    this.tieFighter.rotateOnAxis(
+      new Vector3(0, 1, 0),
+      this.physics.getYawOnAxis() * 15
+    );
+    this.tieFighter.rotateOnAxis(
+      new Vector3(1, 0, 0),
+      this.physics.getPitchOnAxis() * 30
+    );
+    this.tieFighter.rotateOnAxis(
+      new Vector3(0, 0, 1),
+      this.physics.getRollOnAxis() * 30
+    );
   }
 
   private loop(): void {

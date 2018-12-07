@@ -95,7 +95,7 @@ export class Keyboard implements ControllerInterface {
   }
 
   getZoomFactor(): number {
-    console.log("No zoom on Keyboard");
+    // console.log("No zoom on Keyboard");
     return 0;
   }
 

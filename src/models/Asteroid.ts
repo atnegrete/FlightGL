@@ -7,6 +7,7 @@ export class Asteroid extends THREE.Mesh {
     this.geometry = new THREE.SphereGeometry(25, 5, 8);
     this.material = new THREE.MeshBasicMaterial({
       map: texture,
+      overdraw: 0.1,
     });
   }
 }
