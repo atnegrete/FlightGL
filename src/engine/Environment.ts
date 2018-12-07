@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Asteroid } from '../models/Asteroid';
 import { Planet } from '../models/Planet';
-import { Texture } from 'three';
+import { Texture, Mesh } from 'three';
 import { Engine } from './Engine';
 
 export class Environment implements Engine{
@@ -17,6 +17,7 @@ export class Environment implements Engine{
   private tick: number;
   private readonly divisor = 20;
   private readonly planetsRadiusMultiplier = 3.5;
+  private enviromentMeshList: Mesh[] = [];
 
   constructor(
     scene: THREE.Scene,
@@ -85,17 +86,18 @@ export class Environment implements Engine{
         this.getRandomNumber(this.radius * this.planetsRadiusMultiplier)
       );
       this.planets.push(planet);
+      this.enviromentMeshList.push(planet);
       this.scene.add(this.planets[i]);
     }
   }
 
   update(delta: number): void {
-    this.updateObjects(this.asteroids[this.tick % 10], this.radius);
-    this.updateObject(
-      this.planets[this.tick % this.planetsCount],
-      this.radius * this.planetsRadiusMultiplier
-    );
-    this.tick++;
+    // this.updateObjects(this.asteroids[this.tick % 10], this.radius);
+    // this.updateObject(
+    //   this.planets[this.tick % this.planetsCount],
+    //   this.radius * this.planetsRadiusMultiplier
+    // );
+    // this.tick++;
   }
 
   updateObjects(objects: any[], spawnDistance: number) {
@@ -124,6 +126,11 @@ export class Environment implements Engine{
       }
     }
   }
+
+  public getEnviromentMeshList(): Mesh[] {
+    return this.enviromentMeshList;
+  }
+
   private geratePosition(distance: number) {
     const x = this.player.position.x + this.getRandomNumber(distance);
     const y = this.player.position.y + this.getRandomNumber(distance);

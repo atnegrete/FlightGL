@@ -13,9 +13,15 @@ import {
   Geometry,
   PointsMaterial,
   Points,
+  Mesh,
+  Material,
+  MeshPhongMaterial,
+  CubeGeometry,
+  MeshBasicMaterial,
 } from 'three';
 import { Environment } from './engine/Environment';
 import { Physics } from './engine/Physics';
+import { Collision } from './engine/Collision';
 
 // flightGl constants - start
 const DISTANCE = -250;
@@ -76,7 +82,13 @@ class App {
   // engines start
   private environment: Environment;
   private physics: Physics;
+  private collision: Collision;
   // engines end
+
+  private hitBox = new Mesh(
+    new CubeGeometry(100, 100, 100, 1, 1, 1),
+    new MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+  );
 
   constructor() {
     this.controller = createController();
@@ -95,8 +107,9 @@ class App {
     this.light.position.set(0, 1, 1).normalize();
     this.scene.add(this.light);
 
-    this.environment = new Environment(this.scene, this.camera, 1000, 6, 16000);
+    this.environment = new Environment(this.scene, this.camera, 1000, 1, 16000);
     this.physics = new Physics();
+    this.collision = new Collision();
 
     const loader = new ObjectLoader();
 
@@ -107,8 +120,11 @@ class App {
         this.tieFighter = obj;
         this.tieFighter.scale.set(10, 10, 10);
         this.tieFighter.position.set(0, 0, DISTANCE);
+        this.hitBox.position.set(0,0,DISTANCE);
+        this.camera.add(this.hitBox);
         this.camera.add(this.tieFighter);
         this.loop();
+        // this.testLoop(obj);
       },
 
       xhr => {
@@ -119,6 +135,20 @@ class App {
         throw new Error('Error loading Warthog');
       }
     );
+  }
+
+  private testLoop(obj: Object3D): void {
+    const R_WNG: Mesh = <Mesh>obj.children[0];
+    const R_WNG_MAT = <MeshPhongMaterial>R_WNG.material;
+    R_WNG_MAT.setValues({ color: 0xff0000 });
+
+    console.log(R_WNG);
+    this.tieFighter.rotateOnAxis(new Vector3(0, 1, 0), 0.05);
+    this.renderer.render(this.scene, this.camera);
+
+    requestAnimationFrame(() => {
+      this.testLoop(obj);
+    });
   }
 
   private generateStars() {
@@ -148,6 +178,7 @@ class App {
   private adjustCameraLocation() {
     const distance = this.controller.getZoomFactor() * DISTANCE_MULTIPLYIER;
     this.tieFighter.position.z = DISTANCE + distance;
+    this.hitBox.position.z = DISTANCE + distance;
   }
 
   private update(delta: number): void {
@@ -167,7 +198,6 @@ class App {
       }
     } else {
       thrust = this.controller.getThruster();
-      console.log(thrust);
     }
 
     this.physics.thrust = thrust;
@@ -175,6 +205,14 @@ class App {
     this.physics.pitch = pitch;
     this.physics.yaw = yaw;
     this.physics.update(delta);
+
+    console.log(this.environment.getEnviromentMeshList()[0].position);
+    console.log(this.hitBox.position);
+    // this.collision.setEnviromentMeshList(
+    //   this.environment.getEnviromentMeshList()
+    // );
+    // this.collision.setMesh(this.hitBox);
+    // this.collision.update(delta);
   }
 
   private draw(inertia: number): void {
@@ -190,7 +228,7 @@ class App {
         this.camera.translateZ(-10);
       }
     } else {
-      this.camera.translateZ(this.physics.getVelocity())
+      this.camera.translateZ(this.physics.getVelocity());
     }
 
     this.camera.rotateY(-this.physics.getYawRad());
@@ -198,9 +236,18 @@ class App {
     this.camera.rotateZ(-this.physics.getRollRad());
 
     this.tieFighter.setRotationFromAxisAngle(new Vector3(0, 1, 0), 0);
-    this.tieFighter.rotateOnAxis(new Vector3(0, 1, 0), this.physics.getYawOnAxis() * 15);
-    this.tieFighter.rotateOnAxis(new Vector3(1, 0, 0), this.physics.getPitchOnAxis() * 30);
-    this.tieFighter.rotateOnAxis(new Vector3(0, 0, 1), this.physics.getRollOnAxis() * 30);
+    this.tieFighter.rotateOnAxis(
+      new Vector3(0, 1, 0),
+      this.physics.getYawOnAxis() * 15
+    );
+    this.tieFighter.rotateOnAxis(
+      new Vector3(1, 0, 0),
+      this.physics.getPitchOnAxis() * 30
+    );
+    this.tieFighter.rotateOnAxis(
+      new Vector3(0, 0, 1),
+      this.physics.getRollOnAxis() * 30
+    );
   }
 
   private loop(): void {
