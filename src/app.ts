@@ -13,9 +13,17 @@ import {
   Geometry,
   PointsMaterial,
   Points,
+  Mesh,
+  CubeGeometry,
+  MeshBasicMaterial,
+  AudioLoader,
+  AudioListener,
+  Audio,
+  AudioBuffer,
 } from 'three';
-import { Environment } from './Environment';
-import { Physics } from './Physics';
+import { Environment } from './engine/Environment';
+import { Physics } from './engine/Physics';
+import { Collision } from './engine/Collision';
 
 // flightGl constants - start
 const DISTANCE = -250;
@@ -32,13 +40,6 @@ class App {
   private framesThisSecond: number = 0;
   private lastFpsUpdate: number = 0;
   // flightGL game loop vars end
-
-  // flightGL related weights - start
-  private readonly YAW_FACTOR = 0.005;
-  private readonly PITCH_FACTOR = 0.01;
-  private readonly ROLL_FACTOR = 0.02;
-  private readonly THRUSTER_FACTOR = 50;
-  // flightGL related weights - end
 
   // flightGL colors - start
   private readonly BACKGROUND_COLOR: Color = new Color('rgb(0,0,0)');
@@ -76,7 +77,17 @@ class App {
   // engines start
   private environment: Environment;
   private physics: Physics;
+  private collision: Collision;
   // engines end
+
+  // sounds start
+  private listener = new AudioListener();
+  // sounds end
+
+  private hitBox = new Mesh(
+    new CubeGeometry(100, 100, 100, 1, 1, 1),
+    new MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+  );
 
   constructor() {
     this.controller = createController();
@@ -97,6 +108,7 @@ class App {
 
     this.environment = new Environment(this.scene, this.camera, 1000, 6, 16000);
     this.physics = new Physics();
+    this.collision = new Collision(this.listener);
 
     const loader = new ObjectLoader();
 
@@ -104,11 +116,33 @@ class App {
       'src/models/starwars-tie-fighter.json',
 
       obj => {
+        // tie fighter loading
         this.tieFighter = obj;
         this.tieFighter.scale.set(10, 10, 10);
         this.tieFighter.position.set(0, 0, DISTANCE);
+        this.hitBox.position.set(0, 0, DISTANCE);
+
+        // add to camera
+        this.camera.add(this.hitBox);
+        this.camera.add(this.listener);
         this.camera.add(this.tieFighter);
-        this.loop();
+
+        // explosion audio loader
+        const audioLoader = new AudioLoader();
+        audioLoader.load(
+          'src/sounds/explosion.ogg',
+          (buffer: AudioBuffer) => {
+            // create a global audio source
+            this.collision.setHitBuffer(buffer);
+            this.loop();
+          },
+          (xhr: any) => {
+            console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+          },
+          (err: any) => {
+            throw new Error('Error loading exploasion');
+          }
+        );
       },
 
       xhr => {
@@ -116,7 +150,7 @@ class App {
       },
 
       err => {
-        throw new Error('Error loading Warthog');
+        throw new Error('Error loading Tiefighter');
       }
     );
   }
@@ -148,11 +182,12 @@ class App {
   private adjustCameraLocation() {
     const distance = this.controller.getZoomFactor() * DISTANCE_MULTIPLYIER;
     this.tieFighter.position.z = DISTANCE + distance;
+    this.hitBox.position.z = DISTANCE + distance;
   }
 
   private update(delta: number): void {
     this.controller.update();
-    this.environment.update();
+    this.environment.update(delta);
 
     const yaw = this.controller.getYaw();
     const pitch = this.controller.getPitch();
@@ -167,10 +202,19 @@ class App {
       }
     } else {
       thrust = this.controller.getThruster();
-      console.log(thrust);
     }
 
-    this.physics.update(delta, 10, roll, pitch, yaw);
+    this.physics.thrust = thrust;
+    this.physics.roll = roll;
+    this.physics.pitch = pitch;
+    this.physics.yaw = yaw;
+    this.physics.update(delta);
+
+    this.collision.setEnviromentMeshList(
+      this.environment.getEnviromentMeshList()
+    );
+    this.collision.setMesh(this.hitBox);
+    this.collision.update(delta);
   }
 
   private draw(inertia: number): void {

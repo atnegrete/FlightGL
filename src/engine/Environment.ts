@@ -1,9 +1,10 @@
 import * as THREE from 'three';
-import { Asteroid } from './models/Asteroid';
-import { Planet } from './models/Planet';
-import { Texture } from 'three';
+import { Asteroid } from '../models/Asteroid';
+import { Planet } from '../models/Planet';
+import { Texture, Mesh } from 'three';
+import { Engine } from './Engine';
 
-export class Environment {
+export class Environment implements Engine {
   public asteroids: Asteroid[];
   public planets: Planet[];
   private radius: number;
@@ -116,7 +117,7 @@ export class Environment {
     }
   }
 
-  update(): void {
+  update(delta: number): void {
     this.updateObjects(5);
   }
 
@@ -187,6 +188,10 @@ export class Environment {
       const distanceB = this.pCamera.position.distanceTo(b.position);
       return distanceA - distanceB;
     });
+  }
+
+  public getEnviromentMeshList(): Mesh[] {
+    return [...this.asteroids, ...this.planets];
   }
 
   static randomIntFromInterval(min: number, max: number) {

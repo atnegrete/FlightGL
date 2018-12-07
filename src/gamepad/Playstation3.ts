@@ -47,7 +47,6 @@ export class Playstation3 extends Controller implements ControllerInterface {
   }
 
   getZoomFactor(): number {
-    console.log("No zoom on PLaystation 3");
     return 0;
   }
 
