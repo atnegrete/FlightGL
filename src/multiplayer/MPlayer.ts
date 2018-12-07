@@ -55,19 +55,19 @@ export class MPlayer implements Engine {
             console.log(self.room.sessionId, change.value);
             console.log({ change });
             if (change.path.posOrRot == 'position') {
-              if (change.path.attr == 'x') {
+              if (change.path.posOrRot.attr == 'x') {
                 self.updateEnemeyPos(change.value.x, null, null);
-              } else if (change.path.attr == 'y') {
+              } else if (change.path.posOrRot.attr == 'y') {
                 self.updateEnemeyPos(null, change.value, null);
-              } else if (change.path.attr == 'z') {
+              } else if (change.path.posOrRot.attr == 'z') {
                 self.updateEnemeyPos(null, null, change.value);
               }
             } else {
-              if (change.path.attr == 'x') {
+              if (change.path.posOrRot.attr == 'x') {
                 self.updateEnemeyRot(change.value, null, null);
-              } else if (change.path.attr == 'y') {
+              } else if (change.path.posOrRot.attr == 'y') {
                 self.updateEnemeyRot(null, change.value, null);
-              } else if (change.path.attr == 'z') {
+              } else if (change.path.posOrRot.attr == 'z') {
                 self.updateEnemeyRot(null, null, change.value);
               }
             }
