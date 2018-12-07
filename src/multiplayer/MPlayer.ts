@@ -49,40 +49,27 @@ export class MPlayer implements Engine {
       });
 
       this.room.listen(
-        'players/:id/:position/:attr',
+        'players/:id/:posOrRot/:attr',
         (change: Colyseus.DataChange) => {
           if (self.room.sessionId != change.path.id) {
             console.log(self.room.sessionId, change.value);
             console.log({ change });
-            if (change.path.attr == 'x') {
-              self.updateEnemeyPos(change.value.x, null, null);
-            } else if (change.path.attr == 'y') {
-              self.updateEnemeyPos(null, change.value, null);
-            } else if (change.path.attr == 'z') {
-              self.updateEnemeyPos(null, null, change.value);
-            }
-
-            let local = new Vector3(),
-              other = new Vector3();
-            this.tieFighter.getWorldPosition(local);
-            this.enemyTieFighter.getWorldPosition(other);
-            console.log(local, other);
-          }
-        }
-      );
-
-      this.room.listen(
-        'players/:id/:rotation/:attr',
-        (change: Colyseus.DataChange) => {
-          if (self.room.sessionId != change.path.id) {
-            console.log(self.room.sessionId, change.value);
-            console.log({ change });
-            if (change.path.attr == 'rx') {
-              self.updateEnemeyRot(change.value, null, null);
-            } else if (change.path.attr == 'ry') {
-              self.updateEnemeyRot(null, change.value, null);
-            } else if (change.path.attr == 'rz') {
-              self.updateEnemeyRot(null, null, change.value);
+            if (change.path.posOrRot == 'position') {
+              if (change.path.attr == 'x') {
+                self.updateEnemeyPos(change.value.x, null, null);
+              } else if (change.path.attr == 'y') {
+                self.updateEnemeyPos(null, change.value, null);
+              } else if (change.path.attr == 'z') {
+                self.updateEnemeyPos(null, null, change.value);
+              }
+            } else {
+              if (change.path.attr == 'x') {
+                self.updateEnemeyRot(change.value, null, null);
+              } else if (change.path.attr == 'y') {
+                self.updateEnemeyRot(null, change.value, null);
+              } else if (change.path.attr == 'z') {
+                self.updateEnemeyRot(null, null, change.value);
+              }
             }
 
             let local = new Vector3(),
