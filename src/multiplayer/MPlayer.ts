@@ -145,15 +145,15 @@ export class MPlayer implements Engine {
       position,
     });
 
-    let rotation = new Quaternion();
-    this.tieFighter.getWorldQuaternion(rotation);
-
-    rotation.x = this.tieFighter.rotation.x;
-    rotation.y = this.tieFighter.rotation.y;
-    rotation.z = this.tieFighter.rotation.z;
+    let quaternion = new Quaternion();
+    this.tieFighter.getWorldQuaternion(quaternion);
 
     this.room.send({
-      rotation,
+      rotation: {
+        x: quaternion.x,
+        y: quaternion.x,
+        z: quaternion.x,
+      },
     });
   }
 }
