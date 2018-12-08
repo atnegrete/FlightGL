@@ -1,4 +1,5 @@
 # FLIGHT GL
+
 ### By Alan Negrete and Tarek Yacoub
 
 ## Implementation
@@ -52,8 +53,7 @@ In our update loop we have three different objects that updated, Enviroment, Col
 
 ```typescript
 export interface Engine {
-
-    update(delta: number) : void;
+  update(delta: number): void;
 }
 ```
 
@@ -84,7 +84,62 @@ We decided to create a transperent hit box that enclose the tie fighter object. 
 
 ## Enviroment Generation
 
-TODO
+![Environment Spheres](./assets/env1.png)
+
+Procedurally checking the Object's position is far enough that it should be updated and also taking into account the Frustum to ensure that the object that will update is behind the Perspective View of the Camera that the current player is on.
+
+```typescript
+let distance = obj.position.distanceTo(this.pCamera.position);
+if (distance > this.radius) {
+  let frustum = new Frustum();
+  let cameraViewProjectionMatrix = new Matrix4();
+  this.pCamera.matrixWorldInverse.getInverse(this.pCamera.matrixWorld);
+  cameraViewProjectionMatrix.multiplyMatrices(
+    this.pCamera.projectionMatrix,
+    this.pCamera.matrixWorldInverse
+  );
+  frustum.setFromMatrix(cameraViewProjectionMatrix);
+
+  if (!frustum.intersectsObject(obj)) {
+    const updatedPos = this.geratePosition();
+    obj.position.set(updatedPos.x, updatedPos.y, updatedPos.z);
+    return obj;
+  }
+  return null;
+}
+```
+
+Setting up the new position was pretty straight forward, kept it simple and just ensured that we placed it in the distance in front of the current camera's perspective.
+
+```typescript
+  private geratePosition() {
+    let updatedZ = this.radius * 0.8;
+    let updatedPos = new Vector3(
+      this.getRandomPosNegNumber(this.radius * 0.75),
+      this.getRandomPosNegNumber(this.radius * 0.75),
+      this.pCamera.position.z >= 0 ? updatedZ : -updatedZ
+    );
+    this.pCamera.matrixWorldInverse.getInverse(this.pCamera.matrixWorld);
+    updatedPos.applyMatrix4(this.pCamera.matrixWorld);
+    return updatedPos;
+  }
+```
+
+To optimize we just kept the objects in a sorted list based on their distance, we have thousands of
+Meshes on our Scene so obviously looping through all of them dropped the FPS to single digits. To improve that, we moved these updates to the physics updates, not the draw.
+
+```typescript
+  private asteroidSort() {
+    this.asteroids.sort((a: any, b: any) => {
+      const distanceA = this.pCamera.position.distanceTo(a.position);
+      const distanceB = this.pCamera.position.distanceTo(b.position);
+      return distanceA - distanceB;
+    });
+  }
+```
+
+## Multiplayer
+We added support for multiplayer, we use websockets to synchronize the world positions and rotations of the tie fighters.
 
 ## Setup
 
