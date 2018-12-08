@@ -14,11 +14,12 @@
   "dependencies": {
     "@types/node": "^10.12.9",
     "@types/three": "^0.93.9",
+    "colyseus.js": "^0.9.6",
+    "seedrandom": "^2.4.4",
     "three": "^0.98.0",
     "three-orbitcontrols-ts": "^0.1.2",
     "ts-loader": "^2.3.7",
-    "typescript": "^2.6.2",
-    "colyseus.js": "^0.9.6"
+    "typescript": "^2.6.2"
   },
   "devDependencies": {
     "eslint": "^5.9.0",

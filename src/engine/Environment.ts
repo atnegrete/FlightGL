@@ -15,6 +15,7 @@ import {
 import { Asteroid } from '../models/Asteroid';
 import { Planet } from '../models/Planet';
 import { Engine } from './Engine';
+let seedrandom = require('seedrandom');
 
 export class Environment implements Engine {
   public asteroids: Asteroid[];
@@ -35,6 +36,7 @@ export class Environment implements Engine {
     planets: number,
     radius: number
   ) {
+    seedrandom('seed', { global: true });
     this.scene = scene;
     this.pCamera = player;
     this.radius = radius;
