@@ -1,4 +1,4 @@
-import { Scene, WebGLRenderer, DirectionalLight, PerspectiveCamera, Mesh, CubeGeometry, MeshBasicMaterial } from "three";
+import { Scene, WebGLRenderer, DirectionalLight, PerspectiveCamera, Mesh, CubeGeometry, MeshBasicMaterial, NoBlending } from "three";
 import { DIRECTIONAL_LIGHT_COLOR } from "./colors";
 
 export const SCENE = new Scene();
@@ -19,8 +19,8 @@ export const CAMERA = new PerspectiveCamera(
 );
 
 const HIT_BOX_GEOMETRY = new CubeGeometry(100, 100, 100, 1, 1, 1);
-const HIT_BOX_MATERIAL = new MeshBasicMaterial({ color: 0xff0000, wireframe: true, transparent: true ,opacity: 0.0 });
-// const HIT_BOX_MATERIAL = new MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+// const HIT_BOX_MATERIAL = new MeshBasicMaterial({ color: 0xff0000, wireframe: true, transparent: true ,opacity: 0.0});
+const HIT_BOX_MATERIAL = new MeshBasicMaterial({ color: 0xff0000, wireframe: true });
 
 export const HIT_BOX = new Mesh(
     HIT_BOX_GEOMETRY,

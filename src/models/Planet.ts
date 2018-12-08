@@ -10,7 +10,6 @@ export class Planet extends THREE.Mesh {
     this.geometry = new THREE.SphereGeometry(3000, 25, 25);
     this.material = new THREE.MeshBasicMaterial({
       map: texture,
-      overdraw: 0.5,
     });
   }
 }
