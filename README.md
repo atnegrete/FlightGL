@@ -84,7 +84,7 @@ We decided to create a transperent hit box that enclose the tie fighter object. 
 
 ## Enviroment Generation
 
-![Environment Spheres](./assets/env1.png)
+![Environment Spheres](./assets/env1.PNG)
 
 Procedurally checking the Object's position is far enough that it should be updated and also taking into account the Frustum to ensure that the object that will update is behind the Perspective View of the Camera that the current player is on.
 
@@ -139,6 +139,7 @@ Meshes on our Scene so obviously looping through all of them dropped the FPS to 
 ```
 
 ## Multiplayer
+
 We added support for multiplayer, we use websockets to synchronize the world positions and rotations of the tie fighters.
 
 ## Setup
