@@ -83,7 +83,6 @@ class App {
     SCENE.add(LIGHT);
 
     this.environment = new Environment(SCENE, CAMERA, 1000, 6, 16000);
-
     this.physics = new Physics();
     this.collision = new Collision(this.listener);
 
@@ -102,12 +101,12 @@ class App {
         // add to camera
         CAMERA.add(HIT_BOX);
         CAMERA.add(this.listener);
-        CAMERA.add(this.tieFighterP1);
+        // CAMERA.add(this.tieFighterP1);
 
         this.tieFighterP2 = obj.clone();
         this.tieFighterP2.scale.set(10, 10, 10);
         this.tieFighterP2.position.set(0, 0, DISTANCE);
-        SCENE.add(this.tieFighterP2);
+        SCENE.add(this.tieFighterP2); // THIS NOW DOESN'T WORK, I CAN'T FIGURE OUT WHAT CHANGED THAT IT CAN'T BE ADDED TO THE SCENE.
 
         // explosion audio loader
         const audioLoader = new AudioLoader();
