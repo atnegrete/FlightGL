@@ -139,6 +139,8 @@ export class MPlayer implements Engine {
   }
 
   update(delta: number): void {
+    this.tieFighter.parent.updateMatrixWorld(false);
+
     let position = new Vector3();
     this.tieFighter.getWorldPosition(position);
     this.room.send({

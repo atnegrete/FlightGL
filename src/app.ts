@@ -134,7 +134,7 @@ class App {
 
         this.tieFighterP2 = obj.clone();
         this.tieFighterP2.scale.set(10, 10, 10);
-        this.tieFighterP2.position.set(0, 0, DISTANCE - 100);
+        this.tieFighterP2.position.set(0, 0, DISTANCE);
         this.scene.add(this.tieFighterP2);
 
         // explosion audio loader
