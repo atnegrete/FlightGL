@@ -142,7 +142,7 @@ export class MPlayer implements Engine {
     let position = new Vector3();
     this.tieFighter.getWorldPosition(position);
     this.room.send({
-      position: position,
+      position,
     });
 
     let rotation = new Quaternion();
@@ -153,7 +153,7 @@ export class MPlayer implements Engine {
     rotation.z = this.tieFighter.rotation.z;
 
     this.room.send({
-      rotation: rotation,
+      rotation,
     });
   }
 }
