@@ -1,5 +1,5 @@
 import * as Colyseus from 'colyseus.js';
-import { Vector3, Object3D } from 'three';
+import { Vector3, Object3D, Quaternion } from 'three';
 import { Engine } from '../engine/Engine';
 import { RoomAvailable } from 'colyseus.js/lib/Room';
 
@@ -142,16 +142,18 @@ export class MPlayer implements Engine {
     let position = new Vector3();
     this.tieFighter.getWorldPosition(position);
     this.room.send({
-      position,
+      position: position,
     });
 
-    let rotation = new Vector3();
+    let rotation = new Quaternion();
+    this.tieFighter.getWorldQuaternion(rotation);
+
     rotation.x = this.tieFighter.rotation.x;
     rotation.y = this.tieFighter.rotation.y;
     rotation.z = this.tieFighter.rotation.z;
 
     this.room.send({
-      rotation,
+      rotation: rotation,
     });
   }
 }
