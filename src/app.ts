@@ -3,33 +3,35 @@ import { ControllerInterface } from './gamepad/ControllerInterface';
 import {
   Math as THREEMATH,
   ObjectLoader,
-  WebGLRenderer,
-  Scene,
-  PerspectiveCamera,
-  DirectionalLight,
-  Color,
   Object3D,
   Vector3,
   Geometry,
   PointsMaterial,
   Points,
-  Mesh,
-  CubeGeometry,
-  MeshBasicMaterial,
   AudioLoader,
   AudioListener,
-  Audio,
   AudioBuffer,
 } from 'three';
 import { Environment } from './engine/Environment';
 import { Physics } from './engine/Physics';
 import { Collision } from './engine/Collision';
 import { MPlayer } from './multiplayer/MPlayer';
-
-// flightGl constants - start
-const DISTANCE = -250;
-const DISTANCE_MULTIPLYIER = 100;
-// flightGl constants - end
+import {
+  YAW_INTENSITY,
+  PITCH_INTENSITY,
+  ROLL_INTENSITY,
+  YAW_ON_AXIS_INTENSITY,
+  PITCH_ON_AXIS_INTENSITY,
+  ROLL_ON_AXIS_INTENSITY,
+  DISTANCE,
+  DISTANCE_MULTIPLYIER,
+  TIMESTAMP,
+  MAX_FPS,
+  LOOP_MULTIPLIER,
+  MAX_STEPS,
+} from './common/constants';
+import { BACKGROUND_COLOR } from './common/colors';
+import { SCENE, LIGHT, CAMERA, RENDERRER, HIT_BOX } from './common/webgl';
 
 class App {
   // start multiplayer
@@ -39,36 +41,11 @@ class App {
 
   // flightGL game loop vars start
   private lastFrameTimeMs: number = 0;
-  private maxFPS: number = 60;
   private delta: number = 0;
-  private timestep: number = 1000 / 60;
   private fps: number = 60;
   private framesThisSecond: number = 0;
   private lastFpsUpdate: number = 0;
   // flightGL game loop vars end
-
-  // flightGL colors - start
-  private readonly BACKGROUND_COLOR: Color = new Color('rgb(0,0,0)');
-  private readonly DIRECTIONAL_LIGHT_COLOR = 0xffffff;
-  // flightGL colors - end
-
-  // flightGL webGL - start
-  private readonly scene = new Scene();
-  private readonly light = new DirectionalLight(
-    this.DIRECTIONAL_LIGHT_COLOR,
-    1
-  );
-  private readonly renderer = new WebGLRenderer({
-    antialias: true,
-    canvas: <HTMLCanvasElement>document.getElementById('mainCanvas'),
-  });
-  private readonly camera = new PerspectiveCamera(
-    60,
-    innerWidth / innerHeight,
-    0.1,
-    100000
-  );
-  // flightGL webGL - end
 
   // flightGL gamepad - start
   private controller: ControllerInterface;
@@ -77,7 +54,6 @@ class App {
   // flightGL objects - start
   private tieFighterP1: Object3D;
   private tieFighterP2: Object3D;
-  private readonly modelMaxRotation = 15.0 / 360.0;
 
   // flightGL objects - end
 
@@ -91,11 +67,6 @@ class App {
   private listener = new AudioListener();
   // sounds end
 
-  private hitBox = new Mesh(
-    new CubeGeometry(100, 100, 100, 1, 1, 1),
-    new MeshBasicMaterial({ color: 0xff0000, wireframe: true })
-  );
-
   constructor() {
     this.controller = createController();
     if (!this.controller) {
@@ -103,15 +74,16 @@ class App {
       return;
     }
 
-    this.camera.position.set(0, 0, 0);
-    this.scene.add(this.camera);
+    CAMERA.position.set(0, 0, -250);
+    SCENE.add(CAMERA);
 
-    this.renderer.setSize(innerWidth, innerHeight);
-    this.renderer.setClearColor(this.BACKGROUND_COLOR);
-    this.light.position.set(0, 1, 1).normalize();
-    this.scene.add(this.light);
+    RENDERRER.setSize(innerWidth, innerHeight);
+    RENDERRER.setClearColor(BACKGROUND_COLOR);
+    LIGHT.position.set(0, 1, 1).normalize();
+    SCENE.add(LIGHT);
 
-    this.environment = new Environment(this.scene, this.camera, 1000, 6, 16000);
+    this.environment = new Environment(SCENE, CAMERA, 1000, 6, 16000);
+
     this.physics = new Physics();
     this.collision = new Collision(this.listener);
 
@@ -125,20 +97,21 @@ class App {
         this.tieFighterP1 = obj;
         this.tieFighterP1.scale.set(10, 10, 10);
         this.tieFighterP1.position.set(0, 0, DISTANCE);
-        this.hitBox.position.set(0, 0, DISTANCE);
+        HIT_BOX.position.set(0, 0, DISTANCE);
 
         // add to camera
-        this.camera.add(this.hitBox);
-        this.camera.add(this.listener);
-        this.camera.add(this.tieFighterP1);
+        CAMERA.add(HIT_BOX);
+        CAMERA.add(this.listener);
+        CAMERA.add(this.tieFighterP1);
 
         this.tieFighterP2 = obj.clone();
         this.tieFighterP2.scale.set(10, 10, 10);
         this.tieFighterP2.position.set(0, 0, DISTANCE);
-        this.scene.add(this.tieFighterP2);
+        SCENE.add(this.tieFighterP2);
 
         // explosion audio loader
         const audioLoader = new AudioLoader();
+
         audioLoader.load(
           'src/sounds/explosion.ogg',
           (buffer: AudioBuffer) => {
@@ -173,21 +146,20 @@ class App {
   }
 
   private adjustCanvasSize() {
-    this.renderer.setSize(innerWidth, innerHeight);
-    this.camera.aspect = innerWidth / innerHeight;
-    this.camera.updateProjectionMatrix();
+    RENDERRER.setSize(innerWidth, innerHeight);
+    CAMERA.aspect = innerWidth / innerHeight;
+    CAMERA.updateProjectionMatrix();
   }
 
   private adjustCameraLocation() {
     const distance = this.controller.getZoomFactor() * DISTANCE_MULTIPLYIER;
     this.tieFighterP1.position.z = DISTANCE + distance;
-    this.hitBox.position.z = DISTANCE + distance;
+    HIT_BOX.position.z = DISTANCE + distance;
   }
 
   private update(delta: number): void {
     this.controller.update();
     this.environment.update(delta);
-    this.localMPlayer.update(delta);
 
     const yaw = this.controller.getYaw();
     const pitch = this.controller.getPitch();
@@ -213,49 +185,49 @@ class App {
     this.collision.setEnviromentMeshList(
       this.environment.getEnviromentMeshList()
     );
-    this.collision.setMesh(this.hitBox);
+    this.collision.setMesh(HIT_BOX);
     this.collision.update(delta);
   }
 
   private draw(inertia: number): void {
-    this.renderer.render(this.scene, this.camera);
+    RENDERRER.render(SCENE, CAMERA);
 
     this.adjustCanvasSize();
     this.adjustCameraLocation();
 
     if (!this.controller.isVariableThruster()) {
       if (this.controller.isForwardPressed()) {
-        this.camera.translateZ(10);
+        CAMERA.translateZ(10);
       } else if (this.controller.isBackwardPressed()) {
-        this.camera.translateZ(-10);
+        CAMERA.translateZ(-10);
       }
     } else {
-      this.camera.translateZ(this.physics.getVelocity());
+      CAMERA.translateZ(this.physics.getVelocity());
     }
 
-    this.camera.rotateY(-this.physics.getYawRad());
-    this.camera.rotateX(this.physics.getPitchRad());
-    this.camera.rotateZ(-this.physics.getRollRad());
+    CAMERA.rotateY(-this.physics.getYawRad() * YAW_INTENSITY);
+    CAMERA.rotateX(this.physics.getPitchRad() * PITCH_INTENSITY);
+    CAMERA.rotateZ(-this.physics.getRollRad() * ROLL_INTENSITY);
 
     this.tieFighterP1.setRotationFromAxisAngle(new Vector3(0, 1, 0), 0);
     this.tieFighterP1.rotateOnAxis(
       new Vector3(0, 1, 0),
-      this.physics.getYawOnAxis() * 15
+      this.physics.getYawOnAxis() * YAW_ON_AXIS_INTENSITY
     );
     this.tieFighterP1.rotateOnAxis(
       new Vector3(1, 0, 0),
-      this.physics.getPitchOnAxis() * 30
+      this.physics.getPitchOnAxis() * PITCH_ON_AXIS_INTENSITY
     );
     this.tieFighterP1.rotateOnAxis(
       new Vector3(0, 0, 1),
-      this.physics.getRollOnAxis() * 30
+      this.physics.getRollOnAxis() * ROLL_ON_AXIS_INTENSITY
     );
   }
 
   private loop(): void {
     const timestamp = window.performance.now(); // get current timestamp
 
-    if (timestamp < this.lastFrameTimeMs + 1000 / this.maxFPS) {
+    if (timestamp < this.lastFrameTimeMs + LOOP_MULTIPLIER / MAX_FPS) {
       requestAnimationFrame(() => {
         this.loop();
       });
@@ -264,7 +236,7 @@ class App {
     this.delta += timestamp - this.lastFrameTimeMs;
     this.lastFrameTimeMs = timestamp;
 
-    if (timestamp > this.lastFpsUpdate + 1000) {
+    if (timestamp > this.lastFpsUpdate + LOOP_MULTIPLIER) {
       this.fps = 0.25 * this.framesThisSecond + 0.75 * this.fps;
       this.lastFpsUpdate = timestamp;
       this.framesThisSecond = 0;
@@ -273,16 +245,16 @@ class App {
     this.framesThisSecond++;
 
     var numUpdateSteps = 0;
-    while (this.delta >= this.timestep) {
-      this.update(this.timestep / 1000);
-      this.delta -= this.timestep;
-      if (++numUpdateSteps >= 240) {
+    while (this.delta >= TIMESTAMP) {
+      this.update(TIMESTAMP / LOOP_MULTIPLIER);
+      this.delta -= TIMESTAMP;
+      if (++numUpdateSteps >= MAX_STEPS) {
         this.delta = 0;
         break;
       }
     }
 
-    this.draw(this.delta / this.timestep);
+    this.draw(this.delta / TIMESTAMP);
 
     requestAnimationFrame(() => {
       this.loop();

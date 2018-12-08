@@ -99,47 +99,6 @@ export class MPlayer implements Engine {
     if (z) this.enemyTieFighter.rotation.z = z;
   }
 
-  private onStateChange(self: MPlayer, data: any) {
-    console.log('room id:', self.room.id);
-    console.log('client id:', self.client.id);
-    debugger;
-
-    // update position of other tie fighter
-    if (data.players) {
-      Object.keys(data.players).forEach(key => {
-        if (key != self.room.id) {
-          const [x, y, z] = data.players[key];
-          if (x && y && z) this.tieFighter.position.set(x, y, z);
-          console.log('updated other:', x, y, z);
-        }
-      });
-    }
-    console.log('updates:', data, self.room.state);
-  }
-
-  private onDataChange(self: MPlayer, change: Colyseus.DataChange) {
-    console.log('onDataChange:', { change });
-    if (change.operation === 'add') {
-      console.log('new player added to the state');
-      console.log('player id:', change.path.id);
-      console.log('player data:', change.value);
-    } else if (change.operation === 'remove') {
-      console.log('player has been removed from the state');
-      console.log('player id:', change.path.id);
-    }
-  }
-
-  private onOtherPlayerChange(self: MPlayer, change: Colyseus.DataChange) {
-    console.log(change.operation); // => "add" | "remove" | "replace"
-    console.log(change.path.attribute, 'has been changed');
-    console.log(change.path.id);
-    console.log(change.value);
-    const path = change.path.attribute;
-    if (path['position']) {
-      const position = change.value;
-    }
-  }
-
   update(delta: number): void {
     this.tieFighter.matrixAutoUpdate && this.tieFighter.updateMatrix();
     this.tieFighter.parent.updateMatrixWorld(false);
