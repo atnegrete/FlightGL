@@ -52,17 +52,17 @@ export class MPlayer implements Engine {
         if (self.room.sessionId != change.path.id) {
           console.log(self.room.sessionId, change.value);
           console.log({ change });
-          if (change.path.posOrRot.attr == 'x') {
+          if (change.path.attr == 'x') {
             self.updateEnemeyPos(change.value.x, null, null);
-          } else if (change.path.posOrRot.attr == 'y') {
+          } else if (change.path.attr == 'y') {
             self.updateEnemeyPos(null, change.value, null);
-          } else if (change.path.posOrRot.attr == 'z') {
+          } else if (change.path.attr == 'z') {
             self.updateEnemeyPos(null, null, change.value);
-          } else if (change.path.posOrRot.attr == 'rx') {
+          } else if (change.path.attr == 'rx') {
             self.updateEnemeyRot(change.value, null, null);
-          } else if (change.path.posOrRot.attr == 'ry') {
+          } else if (change.path.attr == 'ry') {
             self.updateEnemeyRot(null, change.value, null);
-          } else if (change.path.posOrRot.attr == 'rz') {
+          } else if (change.path.attr == 'rz') {
             self.updateEnemeyRot(null, null, change.value);
           }
           let local = new Vector3(),
