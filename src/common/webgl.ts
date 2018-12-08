@@ -18,7 +18,11 @@ export const CAMERA = new PerspectiveCamera(
     100000
 );
 
+const HIT_BOX_GEOMETRY = new CubeGeometry(100, 100, 100, 1, 1, 1);
+const HIT_BOX_MATERIAL = new MeshBasicMaterial({ color: 0xff0000, wireframe: true, transparent: true ,opacity: 0.0 });
+// const HIT_BOX_MATERIAL = new MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+
 export const HIT_BOX = new Mesh(
-    new CubeGeometry(100, 100, 100, 1, 1, 1),
-    new MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+    HIT_BOX_GEOMETRY,
+    HIT_BOX_MATERIAL
 );
