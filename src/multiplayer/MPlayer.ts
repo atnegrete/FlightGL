@@ -1,5 +1,5 @@
 import * as Colyseus from 'colyseus.js';
-import { Vector3, Object3D, Quaternion } from 'three';
+import { Vector3, Object3D, Quaternion, Matrix4, Euler } from 'three';
 import { Engine } from '../engine/Engine';
 import { RoomAvailable } from 'colyseus.js/lib/Room';
 
@@ -10,6 +10,8 @@ export class MPlayer implements Engine {
   private readonly ROOM_ID = 'state_handler';
   private tieFighter: Object3D;
   private enemyTieFighter: Object3D;
+  private enemyPosition: Vector3;
+  private enemyRotation: Vector3;
   private onRoomReadyCallback: any;
 
   constructor(
@@ -148,14 +150,17 @@ export class MPlayer implements Engine {
       position,
     });
 
-    let quaternion = new Quaternion();
-    this.tieFighter.getWorldQuaternion(quaternion);
+    const rotMat = new Matrix4();
+    this.tieFighter.matrixWorld.extractRotation(rotMat);
+
+    const euler = new Euler();
+    euler.setFromRotationMatrix(rotMat);
 
     this.room.send({
       rotation: {
-        x: quaternion.x,
-        y: quaternion.x,
-        z: quaternion.x,
+        x: euler.x,
+        y: euler.y,
+        z: euler.z,
       },
     });
   }
