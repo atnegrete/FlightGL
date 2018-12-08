@@ -53,7 +53,7 @@ export class MPlayer implements Engine {
           console.log(self.room.sessionId, change.value);
           console.log({ change });
           if (change.path.attr == 'x') {
-            self.updateEnemeyPos(change.value.x, null, null);
+            self.updateEnemeyPos(change.value, null, null);
           } else if (change.path.attr == 'y') {
             self.updateEnemeyPos(null, change.value, null);
           } else if (change.path.attr == 'z') {
@@ -139,6 +139,7 @@ export class MPlayer implements Engine {
   }
 
   update(delta: number): void {
+    this.tieFighter.matrixAutoUpdate && this.tieFighter.updateMatrix();
     this.tieFighter.parent.updateMatrixWorld(false);
 
     let position = new Vector3();
