@@ -11,7 +11,7 @@ export class MPlayer implements Engine {
   private tieFighter: Object3D;
   private enemyTieFighter: Object3D;
   private enemyPosition: Vector3;
-  private enemyRotation: Vector3;
+  private enemyLookAtDirection: Vector3;
   private onRoomReadyCallback: any;
 
   constructor(
@@ -22,6 +22,7 @@ export class MPlayer implements Engine {
     this.tieFighter = fighter;
     this.enemyTieFighter = enemyFighter;
     this.enemyPosition = enemyFighter.position.clone();
+    this.enemyLookAtDirection = new Vector3();
     this.onRoomReadyCallback = onRoomReadyCallback;
 
     this.client = new Colyseus.Client('ws://192.168.1.9:2567');
@@ -95,9 +96,12 @@ export class MPlayer implements Engine {
   }
 
   private updateEnemeyRot(x?: number, y?: number, z?: number) {
-    if (x) this.enemyTieFighter.rotation.x = x;
-    if (y) this.enemyTieFighter.rotation.y = y;
-    if (z) this.enemyTieFighter.rotation.z = z;
+    if (x) this.enemyLookAtDirection.x = x;
+    if (y) this.enemyLookAtDirection.y = y;
+    if (z) this.enemyLookAtDirection.z = z;
+    // if (x) this.enemyTieFighter.rotation.x = x;
+    // if (y) this.enemyTieFighter.rotation.y = y;
+    // if (z) this.enemyTieFighter.rotation.z = z;
   }
 
   update(delta: number): void {
@@ -120,23 +124,28 @@ export class MPlayer implements Engine {
     //     z: euler.z,
     //   },
     // });
-    // let direction = new Vector3();
-    // this.tieFighter.getWorldDirection(direction);
-    // this.room.send({
-    //   rotation: {
-    //     x: direction.x,
-    //     y: direction.y,
-    //     z: direction.z,
-    //   },
-    // });
+    // let v2 = new Vector3();
+    // this.tieFighter.position.
+    let direction = new Vector3();
+    this.tieFighter.getWorldDirection(direction);
+    this.room.send({
+      rotation: {
+        x: direction.x,
+        y: direction.y,
+        z: direction.z,
+      },
+    });
+
+    // update enemy rotaiton
+    if (
+      this.enemyLookAtDirection.x &&
+      this.enemyLookAtDirection.y &&
+      this.enemyLookAtDirection.z
+    ) {
+      this.enemyTieFighter.lookAt(this.enemyLookAtDirection);
+    }
 
     // update enemy position
-    console.log({ delta }, 'Lerping enemy position');
-    // let lerped = this.enemyTieFighter.position.lerpVectors(
-    //   this.enemyTieFighter.position,
-    //   this.enemyPosition,
-    //   delta * 7
-    // );
     this.enemyTieFighter.position.set(
       this.enemyPosition.x,
       this.enemyPosition.y,
