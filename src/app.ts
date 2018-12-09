@@ -32,8 +32,7 @@ import { SCENE, LIGHT, CAMERA, RENDERRER, HIT_BOX } from './common/webgl';
 
 class App {
   // start multiplayer
-  private localMPlayer: MPlayer;
-  private otherMPlayer: MPlayer;
+  private mPlayer: MPlayer;
   // end multiplayer
 
   // flightGL game loop vars start
@@ -109,8 +108,7 @@ class App {
             // create a global audio source
             this.collision.setHitBuffer(buffer);
 
-            if (confirm("Multiplyer?")) {
-
+            if (confirm('Multiplyer?')) {
               // add player two to the scene
               this.tieFighterP2 = obj.clone();
               this.tieFighterP2.scale.set(10, 10, 10);
@@ -119,14 +117,13 @@ class App {
 
               // setup server
               let self = this;
-              this.localMPlayer = new MPlayer(
+              this.mPlayer = new MPlayer(
                 () => {
                   self.loop();
                 },
                 this.tieFighterP1,
                 this.tieFighterP2
               );
-
             } else {
               this.loop();
             }
@@ -165,6 +162,7 @@ class App {
   private update(delta: number): void {
     this.controller.update();
     this.environment.update(delta);
+    this.mPlayer.update(delta);
 
     const yaw = this.controller.getYaw();
     const pitch = this.controller.getPitch();
