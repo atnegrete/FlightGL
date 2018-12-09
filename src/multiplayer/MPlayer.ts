@@ -21,6 +21,7 @@ export class MPlayer implements Engine {
   ) {
     this.tieFighter = fighter;
     this.enemyTieFighter = enemyFighter;
+    this.enemyPosition = enemyFighter.position;
     this.onRoomReadyCallback = onRoomReadyCallback;
 
     this.client = new Colyseus.Client('ws://192.168.1.9:2567');
@@ -124,10 +125,11 @@ export class MPlayer implements Engine {
     });
 
     // update enemy position
-    this.enemyTieFighter.position = this.enemyTieFighter.position.lerpVectors(
+    let lerped = this.enemyTieFighter.position.lerpVectors(
       this.enemyTieFighter.position,
       this.enemyPosition,
       delta
     );
+    this.enemyTieFighter.position.set(lerped.x, lerped.y, lerped.z);
   }
 }
