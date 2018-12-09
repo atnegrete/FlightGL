@@ -5,6 +5,9 @@ import {
   ObjectLoader,
   Object3D,
   Vector3,
+  Geometry,
+  PointsMaterial,
+  Points,
   AudioLoader,
   AudioListener,
   AudioBuffer,
@@ -12,30 +15,11 @@ import {
 import { Environment } from './engine/Environment';
 import { Physics } from './engine/Physics';
 import { Collision } from './engine/Collision';
-import { MPlayer } from './multiplayer/MPlayer';
-import {
-  YAW_INTENSITY,
-  PITCH_INTENSITY,
-  ROLL_INTENSITY,
-  YAW_ON_AXIS_INTENSITY,
-  PITCH_ON_AXIS_INTENSITY,
-  ROLL_ON_AXIS_INTENSITY,
-  DISTANCE,
-  DISTANCE_MULTIPLYIER,
-  TIMESTAMP,
-  MAX_FPS,
-  LOOP_MULTIPLIER,
-  MAX_STEPS,
-} from './common/constants';
+import { YAW_INTENSITY, PITCH_INTENSITY, ROLL_INTENSITY, YAW_ON_AXIS_INTENSITY, PITCH_ON_AXIS_INTENSITY, ROLL_ON_AXIS_INTENSITY, DISTANCE, DISTANCE_MULTIPLYIER, TIMESTAMP, MAX_FPS, LOOP_MULTIPLIER, MAX_STEPS } from './common/constants';
 import { BACKGROUND_COLOR } from './common/colors';
 import { SCENE, LIGHT, CAMERA, RENDERRER, HIT_BOX } from './common/webgl';
 
 class App {
-  // start multiplayer
-  private localMPlayer: MPlayer;
-  private otherMPlayer: MPlayer;
-  // end multiplayer
-
   // flightGL game loop vars start
   private lastFrameTimeMs: number = 0;
   private delta: number = 0;
@@ -49,9 +33,7 @@ class App {
   // flightGL gamepad - end
 
   // flightGL objects - start
-  private tieFighterP1: Object3D;
-  private tieFighterP2: Object3D;
-
+  private tieFighter: Object3D;
   // flightGL objects - end
 
   // engines start
@@ -70,6 +52,8 @@ class App {
       alert('Compatible Controller not found!');
       return;
     }
+
+    this.generateStars();
 
     CAMERA.position.set(0, 0, -250);
     SCENE.add(CAMERA);
@@ -90,15 +74,15 @@ class App {
 
       obj => {
         // tie fighter loading
-        this.tieFighterP1 = obj;
-        this.tieFighterP1.scale.set(10, 10, 10);
-        this.tieFighterP1.position.set(0, 0, DISTANCE);
+        this.tieFighter = obj;
+        this.tieFighter.scale.set(10, 10, 10);
+        this.tieFighter.position.set(0, 0, DISTANCE);
         HIT_BOX.position.set(0, 0, DISTANCE);
 
         // add to camera
         CAMERA.add(HIT_BOX);
         CAMERA.add(this.listener);
-        CAMERA.add(this.tieFighterP1);
+        CAMERA.add(this.tieFighter);
 
         // explosion audio loader
         const audioLoader = new AudioLoader();
@@ -108,28 +92,7 @@ class App {
           (buffer: AudioBuffer) => {
             // create a global audio source
             this.collision.setHitBuffer(buffer);
-
-            if (confirm("Multiplyer?")) {
-
-              // add player two to the scene
-              this.tieFighterP2 = obj.clone();
-              this.tieFighterP2.scale.set(10, 10, 10);
-              this.tieFighterP2.position.set(0, 0, DISTANCE); // IF THE DISTANCE IS THE SAME AS TIE FIGETER P1, THE CAMERA WILL BE INSIDE TIE FIGHTER P2
-              SCENE.add(this.tieFighterP2);
-
-              // setup server
-              let self = this;
-              this.localMPlayer = new MPlayer(
-                () => {
-                  self.loop();
-                },
-                this.tieFighterP1,
-                this.tieFighterP2
-              );
-
-            } else {
-              this.loop();
-            }
+            this.loop();
           },
           (xhr: any) => {
             console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
@@ -150,6 +113,24 @@ class App {
     );
   }
 
+  private generateStars() {
+    var starsGeometry = new Geometry();
+
+    for (var i = 0; i < 500000; i++) {
+      var star = new Vector3();
+      star.x = THREEMATH.randFloatSpread(20000);
+      star.y = THREEMATH.randFloatSpread(20000);
+      star.z = THREEMATH.randFloatSpread(20000);
+
+      starsGeometry.vertices.push(star);
+    }
+
+    var starsMaterial = new PointsMaterial({ color: 0x888888 });
+    var starField = new Points(starsGeometry, starsMaterial);
+
+    SCENE.add(starField);
+  }
+
   private adjustCanvasSize() {
     RENDERRER.setSize(innerWidth, innerHeight);
     CAMERA.aspect = innerWidth / innerHeight;
@@ -158,7 +139,7 @@ class App {
 
   private adjustCameraLocation() {
     const distance = this.controller.getZoomFactor() * DISTANCE_MULTIPLYIER;
-    this.tieFighterP1.position.z = DISTANCE + distance;
+    this.tieFighter.position.z = DISTANCE + distance;
     HIT_BOX.position.z = DISTANCE + distance;
   }
 
@@ -204,7 +185,8 @@ class App {
       if (this.controller.isForwardPressed()) {
         CAMERA.translateZ(10);
       } else if (this.controller.isBackwardPressed()) {
-        CAMERA.translateZ(-10);
+        CAMERA
+          .translateZ(-10);
       }
     } else {
       CAMERA.translateZ(this.physics.getVelocity());
@@ -214,16 +196,16 @@ class App {
     CAMERA.rotateX(this.physics.getPitchRad() * PITCH_INTENSITY);
     CAMERA.rotateZ(-this.physics.getRollRad() * ROLL_INTENSITY);
 
-    this.tieFighterP1.setRotationFromAxisAngle(new Vector3(0, 1, 0), 0);
-    this.tieFighterP1.rotateOnAxis(
+    this.tieFighter.setRotationFromAxisAngle(new Vector3(0, 1, 0), 0);
+    this.tieFighter.rotateOnAxis(
       new Vector3(0, 1, 0),
       this.physics.getYawOnAxis() * YAW_ON_AXIS_INTENSITY
     );
-    this.tieFighterP1.rotateOnAxis(
+    this.tieFighter.rotateOnAxis(
       new Vector3(1, 0, 0),
       this.physics.getPitchOnAxis() * PITCH_ON_AXIS_INTENSITY
     );
-    this.tieFighterP1.rotateOnAxis(
+    this.tieFighter.rotateOnAxis(
       new Vector3(0, 0, 1),
       this.physics.getRollOnAxis() * ROLL_ON_AXIS_INTENSITY
     );
@@ -243,6 +225,7 @@ class App {
 
     if (timestamp > this.lastFpsUpdate + LOOP_MULTIPLIER) {
       this.fps = 0.25 * this.framesThisSecond + 0.75 * this.fps;
+
       this.lastFpsUpdate = timestamp;
       this.framesThisSecond = 0;
     }

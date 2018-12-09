@@ -82,6 +82,10 @@ Raycasting takes a vertices, and returns the distance between that vertics and a
 
 We decided to create a transperent hit box that enclose the tie fighter object. That reduced our loop from 2000 vertices to 8 (hit box vertices).
 
+## Quaternion
+
+We are using THREEJS Quaternion to avoid any gimbal locks. We get the raw the yaw, pitch, and roll from the quntroller, and create three quaternion objects for each. After creating the three objects, we multiply them in the following order roll * pitch * yaw. Finaly we extract the z, x, y from the product and apply them to the camera.
+
 ## Enviroment Generation
 
 ![Environment Spheres](./assets/env1.PNG)
