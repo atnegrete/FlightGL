@@ -88,9 +88,9 @@ export class MPlayer implements Engine {
   }
 
   private updateEnemeyPos(x?: number, y?: number, z?: number) {
-    if (x) this.enemyTieFighter.position.x = x;
-    if (y) this.enemyTieFighter.position.y = y;
-    if (z) this.enemyTieFighter.position.z = z;
+    if (x) this.enemyPosition.x = x;
+    if (y) this.enemyPosition.y = y;
+    if (z) this.enemyPosition.z = z;
   }
 
   private updateEnemeyRot(x?: number, y?: number, z?: number) {
@@ -122,5 +122,12 @@ export class MPlayer implements Engine {
         z: euler.z,
       },
     });
+
+    // update enemy position
+    this.enemyTieFighter.position = this.enemyTieFighter.position.lerpVectors(
+      this.enemyTieFighter.position,
+      this.enemyPosition,
+      delta
+    );
   }
 }
