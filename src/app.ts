@@ -162,7 +162,7 @@ class App {
   private update(delta: number): void {
     this.controller.update();
     this.environment.update(delta);
-    // this.mPlayer.update(delta);
+    this.mPlayer.update(delta);
 
     const yaw = this.controller.getYaw();
     const pitch = this.controller.getPitch();

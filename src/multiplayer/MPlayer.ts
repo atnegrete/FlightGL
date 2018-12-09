@@ -101,7 +101,7 @@ export class MPlayer implements Engine {
   }
 
   update(delta: number): void {
-    console.log({ delta });
+    // console.log({ delta });
     this.tieFighter.matrixAutoUpdate && this.tieFighter.updateMatrix();
     this.tieFighter.parent.updateMatrixWorld(false);
 
