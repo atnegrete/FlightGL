@@ -101,6 +101,7 @@ export class MPlayer implements Engine {
   }
 
   update(delta: number): void {
+    console.log({ delta });
     this.tieFighter.matrixAutoUpdate && this.tieFighter.updateMatrix();
     this.tieFighter.parent.updateMatrixWorld(false);
 
@@ -110,17 +111,27 @@ export class MPlayer implements Engine {
       position,
     });
 
-    const rotMat = new Matrix4();
-    this.tieFighter.matrixWorld.extractRotation(rotMat);
+    // const rotMat = new Matrix4();
+    // this.tieFighter.matrixWorld.extractRotation(rotMat);
 
-    const euler = new Euler();
-    euler.setFromRotationMatrix(rotMat);
+    // const euler = new Euler();
+    // euler.setFromRotationMatrix(rotMat);
 
+    // this.room.send({
+    //   rotation: {
+    //     x: euler.x,
+    //     y: euler.y,
+    //     z: euler.z,
+    //   },
+    // });
+
+    let direction = new Vector3();
+    this.tieFighter.getWorldDirection(direction);
     this.room.send({
       rotation: {
-        x: euler.x,
-        y: euler.y,
-        z: euler.z,
+        x: direction.x,
+        y: direction.y,
+        z: direction.z,
       },
     });
 
@@ -128,7 +139,7 @@ export class MPlayer implements Engine {
     let lerped = this.enemyTieFighter.position.lerpVectors(
       this.enemyTieFighter.position,
       this.enemyPosition,
-      delta
+      delta * 5.0
     );
     this.enemyTieFighter.position.set(lerped.x, lerped.y, lerped.z);
   }
