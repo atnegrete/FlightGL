@@ -21,7 +21,7 @@ export class MPlayer implements Engine {
   ) {
     this.tieFighter = fighter;
     this.enemyTieFighter = enemyFighter;
-    this.enemyPosition = enemyFighter.position;
+    this.enemyPosition = enemyFighter.position.clone();
     this.onRoomReadyCallback = onRoomReadyCallback;
 
     this.client = new Colyseus.Client('ws://192.168.1.9:2567');
@@ -101,10 +101,8 @@ export class MPlayer implements Engine {
   }
 
   update(delta: number): void {
-    // console.log({ delta });
     this.tieFighter.matrixAutoUpdate && this.tieFighter.updateMatrix();
     this.tieFighter.parent.updateMatrixWorld(false);
-
     let position = new Vector3();
     this.tieFighter.getWorldPosition(position);
     this.room.send({
@@ -113,10 +111,8 @@ export class MPlayer implements Engine {
 
     // const rotMat = new Matrix4();
     // this.tieFighter.matrixWorld.extractRotation(rotMat);
-
     // const euler = new Euler();
     // euler.setFromRotationMatrix(rotMat);
-
     // this.room.send({
     //   rotation: {
     //     x: euler.x,
@@ -124,23 +120,27 @@ export class MPlayer implements Engine {
     //     z: euler.z,
     //   },
     // });
-
-    let direction = new Vector3();
-    this.tieFighter.getWorldDirection(direction);
-    this.room.send({
-      rotation: {
-        x: direction.x,
-        y: direction.y,
-        z: direction.z,
-      },
-    });
+    // let direction = new Vector3();
+    // this.tieFighter.getWorldDirection(direction);
+    // this.room.send({
+    //   rotation: {
+    //     x: direction.x,
+    //     y: direction.y,
+    //     z: direction.z,
+    //   },
+    // });
 
     // update enemy position
-    let lerped = this.enemyTieFighter.position.lerpVectors(
-      this.enemyTieFighter.position,
-      this.enemyPosition,
-      delta * 5.0
+    console.log({ delta }, 'Lerping enemy position');
+    // let lerped = this.enemyTieFighter.position.lerpVectors(
+    //   this.enemyTieFighter.position,
+    //   this.enemyPosition,
+    //   delta * 7
+    // );
+    this.enemyTieFighter.position.set(
+      this.enemyPosition.x,
+      this.enemyPosition.y,
+      this.enemyPosition.z
     );
-    this.enemyTieFighter.position.set(lerped.x, lerped.y, lerped.z);
   }
 }

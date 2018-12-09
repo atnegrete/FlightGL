@@ -112,7 +112,8 @@ class App {
               // add player two to the scene
               this.tieFighterP2 = obj.clone();
               this.tieFighterP2.scale.set(10, 10, 10);
-              this.tieFighterP2.position.set(0, 0, DISTANCE); // IF THE DISTANCE IS THE SAME AS TIE FIGETER P1, THE CAMERA WILL BE INSIDE TIE FIGHTER P2
+              this.tieFighterP2.position.set(0, 0, DISTANCE - 250);
+              // IF THE DISTANCE IS THE SAME AS TIE FIGETER P1, THE CAMERA WILL BE INSIDE TIE FIGHTER P2
               SCENE.add(this.tieFighterP2);
 
               // setup server
