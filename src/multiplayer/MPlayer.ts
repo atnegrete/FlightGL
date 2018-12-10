@@ -4,14 +4,13 @@ import { Engine } from '../engine/Engine';
 import { RoomAvailable } from 'colyseus.js/lib/Room';
 
 export class MPlayer implements Engine {
-  private isHost: boolean;
   private client: Colyseus.Client;
   private room: Colyseus.Room;
   private readonly ROOM_ID = 'state_handler';
   private tieFighter: Object3D;
   private enemyTieFighter: Object3D;
   private enemyPosition: Vector3;
-  private enemyLookAtDirection: Vector3;
+  private enemyRotation: Vector3;
   private onRoomReadyCallback: any;
 
   constructor(
@@ -22,7 +21,7 @@ export class MPlayer implements Engine {
     this.tieFighter = fighter;
     this.enemyTieFighter = enemyFighter;
     this.enemyPosition = enemyFighter.position.clone();
-    this.enemyLookAtDirection = new Vector3();
+    this.enemyRotation = enemyFighter.rotation.toVector3().clone();
     this.onRoomReadyCallback = onRoomReadyCallback;
 
     this.client = new Colyseus.Client('ws://192.168.1.9:2567');
@@ -37,11 +36,9 @@ export class MPlayer implements Engine {
       if (!room) {
         console.log('ROOM NOT FOUND, CREATING NEW');
         this.room = this.client.join(this.ROOM_ID, { create: true });
-        this.isHost = true;
       } else {
         console.log('ROOM FOUND');
         this.room = this.client.join(this.ROOM_ID);
-        this.isHost = false;
       }
 
       let self = this;
@@ -71,8 +68,8 @@ export class MPlayer implements Engine {
           }
           let local = new Vector3(),
             other = new Vector3();
-          this.tieFighter.getWorldPosition(local);
-          this.enemyTieFighter.getWorldPosition(other);
+          this.tieFighter.getWorldDirection(local);
+          this.enemyTieFighter.getWorldDirection(other);
           console.log(local, other);
         }
       });
@@ -96,9 +93,9 @@ export class MPlayer implements Engine {
   }
 
   private updateEnemeyRot(x?: number, y?: number, z?: number) {
-    if (x) this.enemyLookAtDirection.x = x;
-    if (y) this.enemyLookAtDirection.y = y;
-    if (z) this.enemyLookAtDirection.z = z;
+    if (x) this.enemyRotation.x = x;
+    if (y) this.enemyRotation.y = y;
+    if (z) this.enemyRotation.z = z;
     // if (x) this.enemyTieFighter.rotation.x = x;
     // if (y) this.enemyTieFighter.rotation.y = y;
     // if (z) this.enemyTieFighter.rotation.z = z;
@@ -113,36 +110,25 @@ export class MPlayer implements Engine {
       position,
     });
 
-    // const rotMat = new Matrix4();
-    // this.tieFighter.matrixWorld.extractRotation(rotMat);
-    // const euler = new Euler();
-    // euler.setFromRotationMatrix(rotMat);
-    // this.room.send({
-    //   rotation: {
-    //     x: euler.x,
-    //     y: euler.y,
-    //     z: euler.z,
-    //   },
-    // });
+    let rotation = this.tieFighter.rotation.toVector3();
+    this.room.send({
+      rotation,
+    });
     // let v2 = new Vector3();
     // this.tieFighter.position.
-    let direction = new Vector3();
-    this.tieFighter.getWorldDirection(direction);
-    this.room.send({
-      rotation: {
-        x: direction.x,
-        y: direction.y,
-        z: direction.z,
-      },
-    });
+    // let direction = new Vector3();
+    // this.tieFighter.getWorldDirection(direction);
+    // this.room.send({
+    //   rotation: {
+    //     x: direction.x,
+    //     y: direction.y,
+    //     z: direction.z,
+    //   },
+    // });
 
     // update enemy rotaiton
-    if (
-      this.enemyLookAtDirection.x &&
-      this.enemyLookAtDirection.y &&
-      this.enemyLookAtDirection.z
-    ) {
-      this.enemyTieFighter.lookAt(this.enemyLookAtDirection);
+    if (this.enemyRotation) {
+      this.enemyTieFighter.lookAt(this.enemyRotation);
     }
 
     // update enemy position
