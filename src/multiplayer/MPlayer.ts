@@ -1,7 +1,6 @@
 import * as Colyseus from 'colyseus.js';
 import { Vector3, Object3D, Quaternion, Matrix4, Euler } from 'three';
 import { Engine } from '../engine/Engine';
-import { RoomAvailable } from 'colyseus.js/lib/Room';
 
 export class MPlayer implements Engine {
   private client: Colyseus.Client;
@@ -24,7 +23,7 @@ export class MPlayer implements Engine {
     this.enemyRotation = new Vector3();
     this.onRoomReadyCallback = onRoomReadyCallback;
 
-    this.client = new Colyseus.Client('ws://192.168.1.9:2567');
+    this.client = new Colyseus.Client('ws://flightgl-ws.herokuapp.com:80');
     this.createOrJoinRoom();
   }
 
