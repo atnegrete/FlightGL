@@ -65,7 +65,7 @@ export class MPlayer implements Engine {
             self.updateEnemeyRot(null, change.value, null);
           } else if (change.path.attr == 'rz') {
             self.updateEnemeyRot(null, null, change.value);
-          } 
+          }
           let local = new Vector3(),
             other = new Vector3();
           this.tieFighter.getWorldDirection(local);
@@ -116,15 +116,6 @@ export class MPlayer implements Engine {
     this.room.send({
       position,
     });
-
-    // let quaternion = new Quaternion();
-    // quaternion.x = this.tieFighter.quaternion.x;
-    // quaternion.y = this.tieFighter.quaternion.y;
-    // quaternion.z = this.tieFighter.quaternion.z;
-    // quaternion.w = this.tieFighter.quaternion.w;
-    // this.room.send({
-    //   quaternion,
-    // });
 
     // update enemy rotaiton
     this.enemyTieFighter.setRotationFromAxisAngle(new Vector3(0, 1, 0), 0);
