@@ -10,7 +10,7 @@ export class MPlayer implements Engine {
   private tieFighter: Object3D;
   private enemyTieFighter: Object3D;
   private enemyPosition: Vector3;
-  private enemyRotation: Quaternion;
+  private enemyRotation: Vector3;
   private onRoomReadyCallback: any;
 
   constructor(
@@ -21,7 +21,7 @@ export class MPlayer implements Engine {
     this.tieFighter = fighter;
     this.enemyTieFighter = enemyFighter;
     this.enemyPosition = enemyFighter.position.clone();
-    this.enemyRotation = new Quaternion();
+    this.enemyRotation = new Vector3();
     this.onRoomReadyCallback = onRoomReadyCallback;
 
     this.client = new Colyseus.Client('ws://192.168.1.9:2567');
@@ -65,9 +65,7 @@ export class MPlayer implements Engine {
             self.updateEnemeyRot(null, change.value, null);
           } else if (change.path.attr == 'rz') {
             self.updateEnemeyRot(null, null, change.value);
-          } else if (change.path.attr == 'rw') {
-            self.updateEnemeyRot(null, null, null, change.value);
-          }
+          } 
           let local = new Vector3(),
             other = new Vector3();
           this.tieFighter.getWorldDirection(local);
@@ -94,11 +92,20 @@ export class MPlayer implements Engine {
     if (z) this.enemyPosition.z = z;
   }
 
-  private updateEnemeyRot(x?: number, y?: number, z?: number, w?: number) {
+  private updateEnemeyRot(x?: number, y?: number, z?: number) {
     if (x) this.enemyRotation.x = x;
     if (y) this.enemyRotation.y = y;
     if (z) this.enemyRotation.z = z;
-    if (w) this.enemyRotation.w = w;
+  }
+
+  public sendPlayerControls(yaw: number, pitch: number, roll: number) {
+    this.room.send({
+      rotation: {
+        x: yaw,
+        y: pitch,
+        z: roll,
+      },
+    });
   }
 
   update(delta: number): void {
@@ -110,17 +117,29 @@ export class MPlayer implements Engine {
       position,
     });
 
-    let quaternion = new Quaternion();
-    quaternion.x = this.tieFighter.quaternion.x;
-    quaternion.y = this.tieFighter.quaternion.y;
-    quaternion.z = this.tieFighter.quaternion.z;
-    quaternion.w = this.tieFighter.quaternion.w;
-    this.room.send({
-      quaternion,
-    });
+    // let quaternion = new Quaternion();
+    // quaternion.x = this.tieFighter.quaternion.x;
+    // quaternion.y = this.tieFighter.quaternion.y;
+    // quaternion.z = this.tieFighter.quaternion.z;
+    // quaternion.w = this.tieFighter.quaternion.w;
+    // this.room.send({
+    //   quaternion,
+    // });
 
     // update enemy rotaiton
-    this.enemyTieFighter.setRotationFromQuaternion(this.enemyRotation);
+    this.enemyTieFighter.setRotationFromAxisAngle(new Vector3(0, 1, 0), 0);
+    this.enemyTieFighter.rotateOnAxis(
+      new Vector3(0, 1, 0),
+      this.enemyRotation.x
+    );
+    this.enemyTieFighter.rotateOnAxis(
+      new Vector3(1, 0, 0),
+      this.enemyRotation.y
+    );
+    this.enemyTieFighter.rotateOnAxis(
+      new Vector3(0, 0, 1),
+      this.enemyRotation.z
+    );
 
     // update enemy position
     this.enemyTieFighter.position.set(

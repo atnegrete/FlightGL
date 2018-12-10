@@ -226,6 +226,12 @@ class App {
       new Vector3(0, 0, 1),
       this.physics.getRollOnAxis() * ROLL_ON_AXIS_INTENSITY
     );
+
+    this.mPlayer.sendPlayerControls(
+      this.physics.getYawOnAxis() * YAW_ON_AXIS_INTENSITY,
+      this.physics.getPitchOnAxis() * PITCH_ON_AXIS_INTENSITY,
+      this.physics.getRollOnAxis() * ROLL_ON_AXIS_INTENSITY
+    );
   }
 
   private loop(): void {
