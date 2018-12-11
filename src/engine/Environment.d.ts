@@ -1,0 +1,31 @@
+import { Scene, PerspectiveCamera, Mesh, Points } from 'three';
+import { Asteroid } from '../models/Asteroid';
+import { Planet } from '../models/Planet';
+import { Engine } from './Engine';
+export declare class Environment implements Engine {
+    asteroids: Asteroid[];
+    starClusters: Points[];
+    planets: Planet[];
+    private radius;
+    private asteroidsCount;
+    private planetsCount;
+    private scene;
+    private textures;
+    private pCamera;
+    private readonly planetsRadiusMultiplier;
+    constructor(scene: Scene, player: PerspectiveCamera, asteroids: number, planets: number, radius: number);
+    loadTextures(): void;
+    private initAsteroids;
+    private initPlanets;
+    private generateStars;
+    update(delta: number): void;
+    private checkAndUpdateAsteroids;
+    private checkAndUpdateStarClusters;
+    private updateInstanceIfFar;
+    private geratePosition;
+    private getRandomPosNegNumber;
+    private asteroidSort;
+    private starClusterSort;
+    getEnviromentMeshList(): Mesh[];
+    static randomIntFromInterval(min: number, max: number): number;
+}

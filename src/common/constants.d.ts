@@ -1,0 +1,13 @@
+export declare const YAW_INTENSITY = 1;
+export declare const ROLL_INTENSITY = 2;
+export declare const PITCH_INTENSITY = 3;
+export declare const YAW_ON_AXIS_INTENSITY = 15;
+export declare const PITCH_ON_AXIS_INTENSITY = 30;
+export declare const ROLL_ON_AXIS_INTENSITY = 30;
+export declare const DISTANCE = -250;
+export declare const DISTANCE_MULTIPLYIER = 100;
+export declare const MAX_ROTATION: number;
+export declare const TIMESTAMP: number;
+export declare const MAX_FPS = 60;
+export declare const LOOP_MULTIPLIER = 1000;
+export declare const MAX_STEPS = 240;

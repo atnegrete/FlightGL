@@ -163,7 +163,10 @@ class App {
   private update(delta: number): void {
     this.controller.update();
     this.environment.update(delta);
-    this.mPlayer.update(delta);
+    if (this.mPlayer !== undefined && this.mPlayer !== null) {
+      this.mPlayer.update(delta);
+    }
+    
 
     const yaw = this.controller.getYaw();
     const pitch = this.controller.getPitch();
@@ -227,11 +230,13 @@ class App {
       this.physics.getRollOnAxis() * ROLL_ON_AXIS_INTENSITY
     );
 
-    this.mPlayer.sendPlayerControls(
-      this.physics.getYawOnAxis() * YAW_ON_AXIS_INTENSITY,
-      this.physics.getPitchOnAxis() * PITCH_ON_AXIS_INTENSITY,
-      this.physics.getRollOnAxis() * ROLL_ON_AXIS_INTENSITY
-    );
+    if (this.mPlayer !== undefined && this.mPlayer !== null) {
+      this.mPlayer.sendPlayerControls(
+        this.physics.getYawOnAxis() * YAW_ON_AXIS_INTENSITY,
+        this.physics.getPitchOnAxis() * PITCH_ON_AXIS_INTENSITY,
+        this.physics.getRollOnAxis() * ROLL_ON_AXIS_INTENSITY
+      );
+    }
   }
 
   private loop(): void {
