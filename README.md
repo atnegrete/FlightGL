@@ -146,6 +146,30 @@ Meshes on our Scene so obviously looping through all of them dropped the FPS to 
 
 We added support for multiplayer, we use websockets to synchronize the world positions and rotations of the tie fighters.
 
+We send our local tieFighter position & rotation to server. We only update in the Physics update call.
+  
+```typescript
+let position = new Vector3();
+    this.tieFighter.getWorldPosition(position);
+    this.room.send({
+      position,
+    });
+```
+
+```typescript
+// These come in from the Physics Engine for the local player.
+public sendPlayerControls(yaw: number, pitch: number, roll: number) {
+    this.room.send({
+      rotation: {
+        x: yaw,
+        y: pitch,
+        z: roll,
+      },
+    });
+  }
+```
+
+
 ## Setup
 
 <h3>Install dependencies:</h3>
